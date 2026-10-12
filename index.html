@@ -112,7 +112,7 @@ function buildClosingForm() {
         const old = (pd.sets || []).find(x => x.ex === e.name) || {};
         const kgv = old.kg ?? (e.kg || "");
         const reps = [...Array(e.sets)].map((_, j) => `<input type="number" inputmode="numeric" min="1" max="100" placeholder="rep ${j + 1}" data-ex="${i}" data-set="${j}" value="${(old.reps || [])[j] ?? ""}">`).join("");
-        const kgTxt = e.kg ? `pautado ${e.kg} kg${e.per_hand ? " por mano" : ""}` : "peso a tantear";
+        const kgTxt = e.kg ? `pautado ${e.kg} kg${e.per_hand ? " por mano" : ""}` : (e.kg === 0 ? "peso corporal" : "peso a tantear");
         return `<div class="ex"><div class="t">${esc(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min === e.rep_max ? e.rep_min : e.rep_min + "-" + e.rep_max} · ${kgTxt}</div>
           <div class="two" style="margin-top:6px"><div><label class="lb">Kilos${e.per_hand ? " (por mano)" : ""}${e.kg === 0 ? " (0 = peso corporal)" : ""}</label><input type="number" inputmode="decimal" min="0" step="0.5" id="kg_${i}" value="${kgv}"></div></div>
           <label class="lb" style="margin-top:6px">Repeticiones de cada serie</label><div class="sets">${reps}</div></div>`;
