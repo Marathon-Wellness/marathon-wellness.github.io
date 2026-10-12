@@ -64,6 +64,13 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
     <div style="height:10px"></div>
     <button id="bc">Enviar cierre</button><div class="msg" id="mc"></div>
   </div>
+  <div class="card">
+    <h2>📷 ¿Prefieres mandar una captura? <span class="muted small">(opcional)</span></h2>
+    <div class="muted small" style="margin-bottom:10px">Una foto o captura de tus ejercicios de hoy (tu libreta, la app del gimnasio, el reloj…). La leemos y apuntamos las series por ti, así no hace falta que las rellenes arriba. Puedes mandar hasta 3 a la vez.</div>
+    <input id="capfile" type="file" accept="image/*" multiple>
+    <div id="capprev" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
+    <button id="bcap" disabled>Enviar captura</button><div class="msg" id="mcap"></div>
+  </div>
 </div>
 <script>
 // La clave "publishable" es publica por diseno: solo puede llamar a funciones que exigen tu token personal.
@@ -205,6 +212,44 @@ $("bc").onclick = async () => {
     say("mc", r.ok ? "Enviado. Gracias." : (r.error || "No se pudo enviar"), r.ok);
   } catch (e) { say("mc", "Sin conexión. Inténtalo de nuevo.", false); }
   $("bc").disabled = false;
+};
+// ---- Capturas opcionales: se reducen en el movil (lado mayor 1600 px, JPEG) para que pesen poco antes de subirlas.
+let CAPS = [];
+function reducir(file) {
+  return new Promise((ok, ko) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      const d = c.toDataURL("image/jpeg", 0.72);
+      ok({ b64: d.split(",")[1], thumb: d });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); ko(new Error("img")); };
+    img.src = url;
+  });
+}
+$("capfile").onchange = async e => {
+  CAPS = []; $("capprev").innerHTML = ""; say("mcap", "", true);
+  const files = [...e.target.files].slice(0, 3);
+  for (const f of files) {
+    try { const r = await reducir(f); CAPS.push(r); $("capprev").insertAdjacentHTML("beforeend", `<img src="${r.thumb}" style="height:70px;border-radius:8px;border:1px solid var(--bd)">`); }
+    catch (x) { say("mcap", "No he podido leer una de las imágenes. Prueba con otra captura.", false); }
+  }
+  $("bcap").disabled = !CAPS.length;
+};
+$("bcap").onclick = async () => {
+  $("bcap").disabled = true; let n = 0, err = "";
+  const s = current();
+  for (const c of CAPS) {
+    try {
+      const r = await rpc("submit_capture", { p_token: TOKEN, p_day: DAY, p_label: s ? s.title : "", p_mime: "image/jpeg", p_image: c.b64, p_note: null });
+      if (r.ok) n++; else err = r.error || "no se pudo enviar";
+    } catch (e) { err = "sin conexión"; }
+  }
+  if (n) { say("mcap", `Enviada${n > 1 ? "s" : ""} ${n} captura${n > 1 ? "s" : ""}. Gracias: la leemos y apuntamos las series.`, true); CAPS = []; $("capprev").innerHTML = ""; $("capfile").value = ""; }
+  else { say("mcap", err ? "No se pudo enviar: " + err : "Nada que enviar.", false); $("bcap").disabled = !CAPS.length; }
 };
 load();
 </script>
