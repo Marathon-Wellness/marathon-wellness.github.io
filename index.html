@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Mi día</title>
+<style>
+:root{--bg:#0f1115;--card:#181c23;--tx:#eef1f6;--mut:#8b93a3;--ac:#4aa3ff;--ok:#3ecf8e;--bad:#ff6b6b;--bd:#262c37}
+@media (prefers-color-scheme:light){:root{--bg:#f4f6fa;--card:#fff;--tx:#161a22;--mut:#667085;--bd:#e3e7ee}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif;padding:16px;max-width:520px;margin-inline:auto}
+h1{font-size:1.3rem;margin:4px 0 2px}h2{font-size:1.05rem;margin:0 0 10px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
+.row{margin-bottom:14px}.row label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
+.row .v{color:var(--ac);font-variant-numeric:tabular-nums}.hint{display:flex;justify-content:space-between;color:var(--mut);font-size:.75rem}
+input[type=range]{width:100%;accent-color:var(--ac)}input[type=number],textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ac);color:#fff;font:600 1rem system-ui;cursor:pointer}button:disabled{opacity:.5}
+.msg{margin-top:10px;font-size:.92rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ses h3{margin:0 0 6px;font-size:1rem}.ses ul{margin:0;padding-left:18px}.ses li{margin-bottom:3px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<h1 id="hi">Mi día</h1>
+<div class="sub" id="day"></div>
+<div id="err" class="card bad" hidden>Enlace no válido. Pídele a tu entrenador un enlace nuevo.</div>
+<div id="app" hidden>
+  <div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div></div>
+  <div class="card">
+    <h2>¿Cómo estás hoy?</h2>
+    <div id="sliders"></div>
+    <textarea id="wnote" rows="2" maxlength="500" placeholder="Algo que quieras contar (opcional)"></textarea>
+    <div style="height:10px"></div>
+    <button id="bw">Guardar cómo estoy</button><div class="msg" id="mw"></div>
+  </div>
+  <div class="card">
+    <h2>Cerrar la sesión</h2>
+    <div class="two">
+      <div><label class="muted">Duración (min)</label><input id="dur" type="number" inputmode="numeric" min="1" max="600"></div>
+      <div><label class="muted">Esfuerzo (1-10)</label><input id="rpe" type="number" inputmode="decimal" min="1" max="10" step="0.5"></div>
+    </div>
+    <div style="height:10px"></div>
+    <textarea id="cnote" rows="2" maxlength="500" placeholder="Molestias o cambios sobre lo pautado (opcional)"></textarea>
+    <div style="height:10px"></div>
+    <button id="bc">Enviar cierre</button><div class="msg" id="mc"></div>
+  </div>
+</div>
+<script>
+// La clave "publishable" es publica por diseno: solo puede llamar a funciones que exigen tu token personal.
+const URL_ = "https://tyzqndbyjgpnvikzktcq.supabase.co";
+const KEY = "sb_publishable_hu3kjIQ4f2WCvcgLenHj4Q_N2RDW5IU";
+const ITEMS = [["sleep","Sueño","muy malo","muy bueno"],["fatigue","Energía","agotado","fresco"],["stress","Estrés","muy alto","muy bajo"],["pain","Dolor / molestias","mucho","ninguno"],["mood","Ánimo","muy bajo","muy alto"]];
+const q = new URLSearchParams(location.hash.slice(1));
+const TOKEN = q.get("t") || "";
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const DAY = today();
+const $ = id => document.getElementById(id);
+async function rpc(fn, args) {
+  const r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, { method: "POST", headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" }, body: JSON.stringify(args) });
+  if (!r.ok) throw new Error("red");
+  return r.json();
+}
+const vals = {};
+ITEMS.forEach(([k, name, lo, hi]) => {
+  vals[k] = 4;
+  const d = document.createElement("div"); d.className = "row";
+  d.innerHTML = `<label>${name}<span class="v" id="v_${k}">4</span></label><input type="range" min="1" max="7" value="4" id="s_${k}"><div class="hint"><span>${lo}</span><span>${hi}</span></div>`;
+  $("sliders").appendChild(d);
+  d.querySelector("input").addEventListener("input", e => { vals[k] = +e.target.value; $("v_" + k).textContent = e.target.value; });
+});
+function say(id, text, ok) { const e = $(id); e.textContent = text; e.className = "msg " + (ok ? "ok" : "bad"); }
+function showSessions(list) {
+  if (!list || !list.length) return;
+  $("sessions").hidden = false;
+  $("sesbody").innerHTML = list.map(s => {
+    const b = s.body || {};
+    const rows = (b.items || []).map(i => `<li>${esc(i)}</li>`).join("");
+    return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}<ul>${rows}</ul></div>`;
+  }).join("");
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+async function load() {
+  $("day").textContent = new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  if (!TOKEN) { $("err").hidden = false; return; }
+  try {
+    const s = await rpc("app_state", { p_token: TOKEN, p_day: DAY });
+    if (!s.ok) { $("err").hidden = false; return; }
+    $("hi").textContent = "Hola, " + s.label;
+    $("app").hidden = false;
+    if (s.wellness) {
+      ITEMS.forEach(([k]) => { vals[k] = s.wellness[k]; $("s_" + k).value = s.wellness[k]; $("v_" + k).textContent = s.wellness[k]; });
+      if (s.wellness.note) $("wnote").value = s.wellness.note;
+      say("mw", "Ya enviado hoy. Puedes corregirlo.", true);
+    }
+    if (s.closings && s.closings[0]) { $("dur").value = s.closings[0].duration_min; $("rpe").value = s.closings[0].rpe; say("mc", "Ya enviado hoy. Puedes corregirlo.", true); }
+    showSessions(s.sessions);
+  } catch (e) { $("err").textContent = "Sin conexión. Inténtalo de nuevo."; $("err").hidden = false; }
+}
+$("bw").onclick = async () => {
+  $("bw").disabled = true;
+  try {
+    const r = await rpc("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null });
+    say("mw", r.ok ? "Guardado. Gracias." : (r.error || "No se pudo guardar"), r.ok);
+  } catch (e) { say("mw", "Sin conexión. Inténtalo de nuevo.", false); }
+  $("bw").disabled = false;
+};
+$("bc").onclick = async () => {
+  const dur = parseInt($("dur").value, 10), rpe = parseFloat($("rpe").value);
+  if (!(dur >= 1 && dur <= 600) || !(rpe >= 1 && rpe <= 10)) { say("mc", "Pon la duración (1-600 min) y el esfuerzo (1-10).", false); return; }
+  $("bc").disabled = true;
+  try {
+    const title = ($("sesbody").querySelector("h3") || {}).textContent || "";
+    const r = await rpc("submit_closing", { p_token: TOKEN, p_day: DAY, p_label: title, p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null });
+    say("mc", r.ok ? "Enviado. Gracias." : (r.error || "No se pudo enviar"), r.ok);
+  } catch (e) { say("mc", "Sin conexión. Inténtalo de nuevo.", false); }
+  $("bc").disabled = false;
+};
+load();
+</script>
+</body>
+</html>
