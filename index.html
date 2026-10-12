@@ -31,6 +31,8 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
   <div class="card">
     <h2>¿Cómo estás hoy?</h2>
     <div id="sliders"></div>
+    <div style="margin-bottom:14px"><label class="lb" for="wkg">Peso en ayunas (kg) · una vez por semana; si hoy no te pesas, déjalo vacío</label>
+      <input id="wkg" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="Ej.: 80.5"></div>
     <textarea id="wnote" rows="2" maxlength="500" placeholder="Algo que quieras contar (opcional)"></textarea>
     <div style="height:10px"></div>
     <button id="bw">Guardar cómo estoy</button><div class="msg" id="mw"></div>
@@ -110,7 +112,7 @@ function buildClosingForm() {
     if (!need.length) {
       box.innerHTML = `<div class="muted small" style="margin-bottom:14px">Todo está fijado en esta sesión: no hace falta anotar series. Si cambiaste algo, escríbelo en la nota.</div>`;
     } else {
-      box.innerHTML = `<h3>Series de hoy <span class="muted small">(solo lo que no estaba fijado)</span></h3>` + need.map((e, i) => {
+      box.innerHTML = `<h3>Series de hoy</h3><div class="muted small" style="margin-bottom:8px">Anota solo lo que hiciste distinto de lo pautado o lo que no tenía peso fijado. Lo que dejes en blanco lo damos por hecho como estaba pautado.</div>` + need.map((e, i) => {
         const old = (pd.sets || []).find(x => x.ex === e.name) || {};
         const kgv = old.kg ?? (e.kg || "");
         const reps = [...Array(e.sets)].map((_, j) => `<input type="number" inputmode="numeric" min="1" max="100" placeholder="rep ${j + 1}" data-ex="${i}" data-set="${j}" value="${(old.reps || [])[j] ?? ""}">`).join("");
@@ -139,6 +141,10 @@ function collectData() {
     sets.push({ ex: e.name, kg: kg >= 0 ? kg : null, reps });
   });
   if (sets.length) data.sets = sets;
+  // Lo que no se anota se da por hecho como pautado (todo en blanco = sesion como estaba; algunos = solo esos cambiaron).
+  const hechos = new Set(sets.map(x => x.ex));
+  const comoPautado = (b.ex || []).filter(e => !hechos.has(e.name)).map(e => e.name);
+  if (comoPautado.length && (b.ex || []).length) data.as_planned = comoPautado;
   if (b.cardio) {
     const c = {}, d = parseFloat($("dist").value), a = parseInt($("hravg").value, 10), m = parseInt($("hrmax").value, 10);
     if (d > 0) c.distance_km = d; if (a >= 30) c.hr_avg = a; if (m >= 30) c.hr_max = m;
@@ -158,6 +164,7 @@ async function load() {
     if (s.wellness) {
       ITEMS.forEach(([k]) => { vals[k] = s.wellness[k]; $("s_" + k).value = s.wellness[k]; $("v_" + k).textContent = s.wellness[k]; });
       if (s.wellness.note) $("wnote").value = s.wellness.note;
+      if (s.wellness.weight_kg) $("wkg").value = s.wellness.weight_kg;
       say("mw", "Ya enviado hoy. Puedes corregirlo.", true);
     }
     showSessions();
@@ -171,8 +178,10 @@ async function load() {
 }
 $("bw").onclick = async () => {
   $("bw").disabled = true;
+  const kg = parseFloat($("wkg").value);
+  if ($("wkg").value && !(kg >= 30 && kg <= 250)) { say("mw", "El peso debe estar entre 30 y 250 kg.", false); $("bw").disabled = false; return; }
   try {
-    const r = await rpc("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null });
+    const r = await rpc("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null, p_weight: kg >= 30 && kg <= 250 ? kg : null });
     say("mw", r.ok ? "Guardado. Gracias." : (r.error || "No se pudo guardar"), r.ok);
   } catch (e) { say("mw", "Sin conexión. Inténtalo de nuevo.", false); }
   $("bw").disabled = false;
