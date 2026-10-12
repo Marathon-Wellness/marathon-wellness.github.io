@@ -9,14 +9,17 @@
 :root{--bg:#0f1115;--card:#181c23;--tx:#eef1f6;--mut:#8b93a3;--ac:#4aa3ff;--ok:#3ecf8e;--bad:#ff6b6b;--bd:#262c37}
 @media (prefers-color-scheme:light){:root{--bg:#f4f6fa;--card:#fff;--tx:#161a22;--mut:#667085;--bd:#e3e7ee}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif;padding:16px;max-width:520px;margin-inline:auto}
-h1{font-size:1.3rem;margin:4px 0 2px}h2{font-size:1.05rem;margin:0 0 10px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}
+h1{font-size:1.3rem;margin:4px 0 2px}h2{font-size:1.05rem;margin:0 0 10px}h3{font-size:.98rem;margin:0 0 6px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
 .row{margin-bottom:14px}.row label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
 .row .v{color:var(--ac);font-variant-numeric:tabular-nums}.hint{display:flex;justify-content:space-between;color:var(--mut);font-size:.75rem}
-input[type=range]{width:100%;accent-color:var(--ac)}input[type=number],textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+input[type=range]{width:100%;accent-color:var(--ac)}
+input[type=number],textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
 button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ac);color:#fff;font:600 1rem system-ui;cursor:pointer}button:disabled{opacity:.5}
-.msg{margin-top:10px;font-size:.92rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ses h3{margin:0 0 6px;font-size:1rem}.ses ul{margin:0;padding-left:18px}.ses li{margin-bottom:3px}.muted{color:var(--mut)}
+.msg{margin-top:10px;font-size:.92rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ses h3{margin:0 0 6px;font-size:1rem}.ses ul{margin:0;padding-left:18px}.ses li{margin-bottom:3px}.muted{color:var(--mut)}.small{font-size:.85rem}
+.ex{border-top:1px solid var(--bd);padding:10px 0}.ex:first-of-type{border-top:0}.ex .t{font-weight:600}.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;margin-top:6px}
+label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
 </style>
 </head>
 <body>
@@ -34,9 +37,20 @@ button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ac);
   </div>
   <div class="card">
     <h2>Cerrar la sesión</h2>
+    <div id="pick" class="row" hidden><label class="lb" for="selses">¿Qué sesión cierras?</label><select id="selses"></select></div>
+    <div id="strength" hidden></div>
+    <div id="cardio" hidden>
+      <h3>Datos del cardio <span class="muted small">(del resumen del reloj)</span></h3>
+      <div class="three">
+        <div><label class="lb">Distancia (km)</label><input id="dist" type="number" inputmode="decimal" min="0" step="0.01"></div>
+        <div><label class="lb">FC media</label><input id="hravg" type="number" inputmode="numeric" min="30" max="230"></div>
+        <div><label class="lb">FC pico</label><input id="hrmax" type="number" inputmode="numeric" min="30" max="230"></div>
+      </div>
+      <div style="height:14px"></div>
+    </div>
     <div class="two">
-      <div><label class="muted">Duración (min)</label><input id="dur" type="number" inputmode="numeric" min="1" max="600"></div>
-      <div><label class="muted">Esfuerzo (1-10)</label><input id="rpe" type="number" inputmode="decimal" min="1" max="10" step="0.5"></div>
+      <div><label class="lb">Duración (min)</label><input id="dur" type="number" inputmode="numeric" min="1" max="600"></div>
+      <div><label class="lb">Esfuerzo global (1-10)</label><input id="rpe" type="number" inputmode="decimal" min="1" max="10" step="0.5"></div>
     </div>
     <div style="height:10px"></div>
     <textarea id="cnote" rows="2" maxlength="500" placeholder="Molestias o cambios sobre lo pautado (opcional)"></textarea>
@@ -54,6 +68,7 @@ const TOKEN = q.get("t") || "";
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
 const DAY = today();
 const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 async function rpc(fn, args) {
   const r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, { method: "POST", headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" }, body: JSON.stringify(args) });
   if (!r.ok) throw new Error("red");
@@ -68,16 +83,67 @@ ITEMS.forEach(([k, name, lo, hi]) => {
   d.querySelector("input").addEventListener("input", e => { vals[k] = +e.target.value; $("v_" + k).textContent = e.target.value; });
 });
 function say(id, text, ok) { const e = $(id); e.textContent = text; e.className = "msg " + (ok ? "ok" : "bad"); }
-function showSessions(list) {
-  if (!list || !list.length) return;
+
+let SESSIONS = [], CLOSINGS = [];
+function showSessions() {
+  if (!SESSIONS.length) return;
   $("sessions").hidden = false;
-  $("sesbody").innerHTML = list.map(s => {
+  $("sesbody").innerHTML = SESSIONS.map(s => {
     const b = s.body || {};
-    const rows = (b.items || []).map(i => `<li>${esc(i)}</li>`).join("");
-    return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}<ul>${rows}</ul></div>`;
+    return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}<ul>${(b.items || []).map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`;
   }).join("");
 }
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function current() { return SESSIONS.length ? SESSIONS[+$("selses").value || 0] : null; }
+function closingFor(title) { return CLOSINGS.find(c => c.label === title) || null; }
+
+// Solo se piden series de los ejercicios cuyo peso o repeticiones NO estan fijados (a tantear, estimado o rango).
+function buildClosingForm() {
+  const s = current(), b = (s && s.body) || {};
+  const prev = (s && closingFor(s.title)) || {};
+  const pd = prev.data || {};
+  const need = (b.ex || []).filter(e => e.need);
+  const box = $("strength");
+  if ((b.ex || []).length) {
+    box.hidden = false;
+    if (!need.length) {
+      box.innerHTML = `<div class="muted small" style="margin-bottom:14px">Todo está fijado en esta sesión: no hace falta anotar series. Si cambiaste algo, escríbelo en la nota.</div>`;
+    } else {
+      box.innerHTML = `<h3>Series de hoy <span class="muted small">(solo lo que no estaba fijado)</span></h3>` + need.map((e, i) => {
+        const old = (pd.sets || []).find(x => x.ex === e.name) || {};
+        const kgv = old.kg ?? (e.kg || "");
+        const reps = [...Array(e.sets)].map((_, j) => `<input type="number" inputmode="numeric" min="1" max="100" placeholder="rep ${j + 1}" data-ex="${i}" data-set="${j}" value="${(old.reps || [])[j] ?? ""}">`).join("");
+        const kgTxt = e.kg ? `pautado ${e.kg} kg${e.per_hand ? " por mano" : ""}` : "peso a tantear";
+        return `<div class="ex"><div class="t">${esc(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min === e.rep_max ? e.rep_min : e.rep_min + "-" + e.rep_max} · ${kgTxt}</div>
+          <div class="two" style="margin-top:6px"><div><label class="lb">Kilos${e.per_hand ? " (por mano)" : ""}${e.kg === 0 ? " (0 = peso corporal)" : ""}</label><input type="number" inputmode="decimal" min="0" step="0.5" id="kg_${i}" value="${kgv}"></div></div>
+          <label class="lb" style="margin-top:6px">Repeticiones de cada serie</label><div class="sets">${reps}</div></div>`;
+      }).join("") + `<div style="height:14px"></div>`;
+    }
+  } else { box.hidden = true; box.innerHTML = ""; }
+  $("cardio").hidden = !b.cardio;
+  const cd = pd.cardio || {};
+  $("dist").value = cd.distance_km ?? ""; $("hravg").value = cd.hr_avg ?? ""; $("hrmax").value = cd.hr_max ?? "";
+  $("dur").value = prev.duration_min ?? ""; $("rpe").value = prev.rpe ?? ""; $("cnote").value = prev.note ?? "";
+  say("mc", prev.duration_min ? "Ya enviado hoy. Puedes corregirlo." : "", true);
+}
+function collectData() {
+  const s = current(), b = (s && s.body) || {};
+  const data = {};
+  const need = (b.ex || []).filter(e => e.need);
+  const sets = [];
+  need.forEach((e, i) => {
+    const reps = [...document.querySelectorAll(`input[data-ex="${i}"]`)].map(x => parseInt(x.value, 10)).filter(n => n >= 1 && n <= 100);
+    if (!reps.length) return;
+    const kg = parseFloat($("kg_" + i).value);
+    sets.push({ ex: e.name, kg: kg >= 0 ? kg : null, reps });
+  });
+  if (sets.length) data.sets = sets;
+  if (b.cardio) {
+    const c = {}, d = parseFloat($("dist").value), a = parseInt($("hravg").value, 10), m = parseInt($("hrmax").value, 10);
+    if (d > 0) c.distance_km = d; if (a >= 30) c.hr_avg = a; if (m >= 30) c.hr_max = m;
+    if (Object.keys(c).length) data.cardio = c;
+  }
+  return Object.keys(data).length ? data : null;
+}
 async function load() {
   $("day").textContent = new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
   if (!TOKEN) { $("err").hidden = false; return; }
@@ -86,13 +152,19 @@ async function load() {
     if (!s.ok) { $("err").hidden = false; return; }
     $("hi").textContent = "Hola, " + s.label;
     $("app").hidden = false;
+    SESSIONS = s.sessions || []; CLOSINGS = s.closings || [];
     if (s.wellness) {
       ITEMS.forEach(([k]) => { vals[k] = s.wellness[k]; $("s_" + k).value = s.wellness[k]; $("v_" + k).textContent = s.wellness[k]; });
       if (s.wellness.note) $("wnote").value = s.wellness.note;
       say("mw", "Ya enviado hoy. Puedes corregirlo.", true);
     }
-    if (s.closings && s.closings[0]) { $("dur").value = s.closings[0].duration_min; $("rpe").value = s.closings[0].rpe; say("mc", "Ya enviado hoy. Puedes corregirlo.", true); }
-    showSessions(s.sessions);
+    showSessions();
+    if (SESSIONS.length > 1) {
+      $("pick").hidden = false;
+      $("selses").innerHTML = SESSIONS.map((x, i) => `<option value="${i}">${esc(x.title)}</option>`).join("");
+      $("selses").onchange = buildClosingForm;
+    }
+    buildClosingForm();
   } catch (e) { $("err").textContent = "Sin conexión. Inténtalo de nuevo."; $("err").hidden = false; }
 }
 $("bw").onclick = async () => {
@@ -108,8 +180,8 @@ $("bc").onclick = async () => {
   if (!(dur >= 1 && dur <= 600) || !(rpe >= 1 && rpe <= 10)) { say("mc", "Pon la duración (1-600 min) y el esfuerzo (1-10).", false); return; }
   $("bc").disabled = true;
   try {
-    const title = ($("sesbody").querySelector("h3") || {}).textContent || "";
-    const r = await rpc("submit_closing", { p_token: TOKEN, p_day: DAY, p_label: title, p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null });
+    const s = current();
+    const r = await rpc("submit_closing", { p_token: TOKEN, p_day: DAY, p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() });
     say("mc", r.ok ? "Enviado. Gracias." : (r.error || "No se pudo enviar"), r.ok);
   } catch (e) { say("mc", "Sin conexión. Inténtalo de nuevo.", false); }
   $("bc").disabled = false;
