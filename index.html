@@ -64,7 +64,9 @@ const URL_ = "https://tyzqndbyjgpnvikzktcq.supabase.co";
 const KEY = "sb_publishable_hu3kjIQ4f2WCvcgLenHj4Q_N2RDW5IU";
 const ITEMS = [["sleep","Sueño","muy malo","muy bueno"],["fatigue","Energía","agotado","fresco"],["stress","Estrés","muy alto","muy bajo"],["pain","Dolor / molestias","mucho","ninguno"],["mood","Ánimo","muy bajo","muy alto"]];
 const q = new URLSearchParams(location.hash.slice(1));
-const TOKEN = q.get("t") || "";
+// Enlaces: #guillermo-<codigo> (el nombre es solo estetico; el codigo es lo que identifica) o el antiguo #t=<codigo>.
+const H = location.hash.slice(1);
+const TOKEN = (q.get("t") || (H.includes("-") ? H.split("-").pop() : H)).replace(/[^a-zA-Z0-9]/g, "");
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
 const DAY = today();
 const $ = id => document.getElementById(id);
