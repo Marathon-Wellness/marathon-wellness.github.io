@@ -20,6 +20,12 @@ button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ac);
 .ses h3{margin:0 0 6px;font-size:1rem}.ses ul{margin:0;padding-left:18px}.ses li{margin-bottom:3px}.muted{color:var(--mut)}.small{font-size:.85rem}
 .ex{border-top:1px solid var(--bd);padding:10px 0}.ex:first-of-type{border-top:0}.ex .t{font-weight:600}.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;margin-top:6px}
 label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
+.bar{height:8px;border-radius:6px;background:var(--bd);overflow:hidden;margin:6px 0 10px}.bar i{display:block;height:100%;background:var(--ok)}
+.wk{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--bd)}.wk:first-of-type{border-top:0}
+.wk .d{color:var(--mut);font-size:.85rem}.wk.hoy .t{font-weight:700}.wk .chg{width:auto;padding:6px 10px;font-size:.8rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
+.mv{border-top:1px solid var(--bd);padding:8px 0 4px}
+.rest{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-top:1px solid var(--bd);margin-top:10px;padding-top:10px}.rest button{width:auto;padding:6px 10px;font-size:.85rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
+#restv{font-variant-numeric:tabular-nums;font-weight:700;margin-left:auto}#restv.fin{color:var(--ok)}
 </style>
 </head>
 <body>
@@ -27,7 +33,11 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
 <div class="sub" id="day"></div>
 <div id="err" class="card bad" hidden>Enlace no válido. Pídele a tu entrenador un enlace nuevo.</div>
 <div id="app" hidden>
-  <div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div></div>
+  <div class="card" id="pend" hidden></div>
+  <div class="card" id="week" hidden><h2>Mi semana</h2><div id="weekbody"></div><div class="msg" id="mm"></div></div>
+  <div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div>
+    <div class="rest" id="rest" hidden><span class="muted small">⏱ Descanso entre series</span><button data-s="60">1:00</button><button data-s="90">1:30</button><button data-s="120">2:00</button><button data-s="180">3:00</button><span id="restv"></span></div></div>
+  <div class="card" id="restday" hidden></div>
   <div class="card">
     <h2>¿Cómo estás hoy?</h2>
     <div id="sliders"></div>
@@ -71,6 +81,19 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
     <div id="capprev" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
     <button id="bcap" disabled>Enviar captura</button><div class="msg" id="mcap"></div>
   </div>
+  <div class="card" id="logros" hidden>
+    <h2>🏅 Mi constancia</h2>
+    <div id="logrosbody"></div>
+    <div style="height:10px"></div>
+    <button id="bexp">Descargar mi resumen</button>
+  </div>
+  <div class="card">
+    <h2>💬 Mensaje a tu entrenador <span class="muted small">(opcional)</span></h2>
+    <div class="muted small" style="margin-bottom:10px">Para avisar de algo breve («hoy no puedo entrenar», «me molesta la rodilla»). No es un chat: lo leerá cuando abra su panel y no recibirás respuesta aquí.</div>
+    <textarea id="msgtxt" rows="2" maxlength="500" placeholder="Escribe tu mensaje"></textarea>
+    <div style="height:10px"></div>
+    <button id="bmsg">Enviar mensaje</button><div class="msg" id="mmsg"></div>
+  </div>
 </div>
 <script>
 // La clave "publishable" es publica por diseno: solo puede llamar a funciones que exigen tu token personal.
@@ -100,15 +123,97 @@ ITEMS.forEach(([k, name, lo, hi]) => {
 });
 function say(id, text, ok) { const e = $(id); e.textContent = text; e.className = "msg " + (ok ? "ok" : "bad"); }
 
-let SESSIONS = [], CLOSINGS = [];
+// ---- Borrador en el movil: lo que escribes se guarda solo (en este telefono) y se recupera si pierdes cobertura o cierras la pagina.
+const DK = `mw_draft_${TOKEN}_${DAY}`;
+const loadD = () => { try { return JSON.parse(localStorage.getItem(DK) || "{}"); } catch (e) { return {}; } };
+const saveD = d => { try { Object.keys(d).length ? localStorage.setItem(DK, JSON.stringify(d)) : localStorage.removeItem(DK); } catch (e) { /* sin almacenamiento: se sigue sin borrador */ } };
+function fieldKey(el) {
+  if (el.type === "file" || el.id === "selses") return null;
+  if (/^s_/.test(el.id) || el.id === "wkg" || el.id === "wnote") return "w|" + el.id;
+  const s = current(), t = s ? s.title : "";
+  if (el.dataset && el.dataset.ex !== undefined) return `c|${t}|r${el.dataset.ex}_${el.dataset.set}`;
+  return el.id ? `c|${t}|${el.id}` : null;
+}
+function guardarBorrador(e) {
+  const k = fieldKey(e.target); if (!k) return;
+  const d = loadD(); d[k] = e.target.type === "checkbox" ? e.target.checked : e.target.value; saveD(d);
+}
+function borrarBorrador(prefix) { const d = loadD(); Object.keys(d).forEach(k => { if (k.startsWith(prefix)) delete d[k]; }); saveD(d); }
+function restaurarBorrador(prefix) {
+  const d = loadD(); let n = 0;
+  Object.keys(d).filter(k => k.startsWith(prefix)).forEach(k => {
+    const id = k.split("|").pop(), m = /^r(\d+)_(\d+)$/.exec(id);
+    const el = m ? document.querySelector(`input[data-ex="${m[1]}"][data-set="${m[2]}"]`) : $(id);
+    if (!el) return;
+    if (el.type === "checkbox") el.checked = !!d[k]; else el.value = d[k];
+    const sl = /^s_(\w+)$/.exec(id); if (sl) { vals[sl[1]] = +d[k]; $("v_" + sl[1]).textContent = d[k]; }
+    n++;
+  });
+  return n;
+}
+$("app").addEventListener("input", guardarBorrador);
+$("app").addEventListener("change", guardarBorrador);
+
+let SESSIONS = [], CLOSINGS = [], WEEK = [], MOVED = false, PREV = null;
+const DOW = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+const fmtDay = iso => { const d = new Date(iso + "T12:00:00"); return DOW[d.getDay()] + " " + d.getDate() + "/" + String(d.getMonth() + 1).padStart(2, "0"); };
+// Resumen de la semana y «cambiar mi dia»: la nube solo ofrece los dias que el entrenador (su revisor de semana) deja libres de choques.
+function showWeek() {
+  $("week").hidden = !WEEK.length;
+  if (!WEEK.length) return;
+  const hechas = WEEK.filter(w => w.done).length, pct = Math.round(100 * hechas / WEEK.length);
+  const libre = w => !w.done && !MOVED && w.day >= DAY && (w.moves || []).some(m => m >= DAY);
+  $("weekbody").innerHTML = `<div><b>${hechas}</b> de ${WEEK.length} sesiones cerradas</div><div class="bar"><i style="width:${pct}%"></i></div>`
+    + WEEK.map((w, i) => `<div class="wk${w.day === DAY ? " hoy" : ""}" data-i="${i}"><div><div class="t">${w.done ? "✓ " : ""}${esc(w.title)}</div><div class="d">${fmtDay(w.day)}${w.day === DAY ? " · hoy" : ""}</div></div>${libre(w) ? `<button class="chg" data-i="${i}">Cambiar de día</button>` : ""}</div>`).join("")
+    + (MOVED ? `<div class="muted small" style="margin-top:8px">Ya usaste tu cambio de día de esta semana.</div>` : "")
+    + (PREV && PREV.total > 0 ? `<div class="muted small" style="margin-top:8px">Semana pasada: ${PREV.done} de ${PREV.total} sesiones cerradas${PREV.done === PREV.total ? " 👏" : ""}.</div>` : "");
+  document.querySelectorAll("#weekbody .chg").forEach(b => b.onclick = () => abrirCambio(+b.dataset.i));
+}
+function abrirCambio(i) {
+  const w = WEEK[i], row = document.querySelector(`#weekbody .wk[data-i="${i}"]`);
+  document.querySelectorAll("#weekbody .mv").forEach(x => x.remove());
+  const opts = (w.moves || []).filter(m => m >= DAY).map(m => `<option value="${m}">${fmtDay(m)}</option>`).join("");
+  row.insertAdjacentHTML("afterend", `<div class="mv"><label class="lb">¿A qué día la pasas? Solo se puede una vez por semana y dentro de esta semana; tu entrenador lo verá.</label><select id="mvday">${opts}</select><div style="height:8px"></div><button id="mvgo">Confirmar el cambio</button></div>`);
+  $("mvgo").onclick = async () => {
+    $("mvgo").disabled = true;
+    try {
+      const r = await rpc("submit_move", { p_token: TOKEN, p_title: w.title, p_from: w.day, p_to: $("mvday").value });
+      if (r.ok) { say("mm", "Cambiado. Tu entrenador ya lo sabe.", true); await load(); } else { say("mm", r.error || "No se pudo cambiar", false); $("mvgo").disabled = false; }
+    } catch (e) { say("mm", "Sin conexión. Inténtalo de nuevo.", false); $("mvgo").disabled = false; }
+  };
+}
 function showSessions() {
+  $("sessions").hidden = !SESSIONS.length;
+  $("rest").hidden = !SESSIONS.some(x => (x.body || {}).kind !== "cardio" && ((x.body || {}).ex || []).length);
   if (!SESSIONS.length) return;
-  $("sessions").hidden = false;
   $("sesbody").innerHTML = SESSIONS.map(s => {
     const b = s.body || {};
     return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}<ul>${(b.items || []).map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`;
   }).join("");
 }
+// ---- Temporizador de descanso: cuenta con la hora real (aguanta que el movil apague la pantalla), vibra y suena al terminar.
+let REST_END = 0, REST_T = null;
+function pitido() { try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(); o.frequency.value = 880; o.connect(a.destination); o.start(); setTimeout(() => { o.stop(); a.close(); }, 350); } catch (e) { /* sin audio */ } }
+function tickRest() {
+  const left = Math.ceil((REST_END - Date.now()) / 1000), v = $("restv");
+  if (left > 0) { v.className = ""; v.textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0"); return; }
+  clearInterval(REST_T); REST_T = null; v.className = "fin"; v.textContent = "¡Listo!";
+  try { navigator.vibrate && navigator.vibrate([300, 100, 300]); } catch (e) { /* sin vibracion */ }
+  pitido();
+}
+document.querySelectorAll("#rest button").forEach(b => b.onclick = () => { REST_END = Date.now() + (+b.dataset.s) * 1000; clearInterval(REST_T); REST_T = setInterval(tickRest, 250); tickRest(); });
+// ---- Lo que falta hoy (cómo estás / cierre de cada sesion) y, en dia de descanso, la proxima sesion.
+function showPend(s) {
+  const falta = [];
+  if (!s.wellness) falta.push("cómo estás hoy");
+  SESSIONS.forEach(x => { if (!closingFor(x.title)) falta.push("el cierre de «" + x.title + "»"); });
+  $("pend").hidden = !falta.length;
+  $("pend").innerHTML = falta.length ? `<b>Te falta hoy:</b> ${falta.map(esc).join(" · ")}` : "";
+  const rd = $("restday");
+  rd.hidden = !!SESSIONS.length;
+  if (!SESSIONS.length) rd.innerHTML = `<h2>Hoy toca descanso</h2><div class="muted">${s.next ? `Tu próxima sesión: <b>${esc(s.next.title)}</b> · ${fmtDay(s.next.day)}.` : "Aprovecha para recuperar bien."}</div>`;
+}
+
 function current() { return SESSIONS.length ? SESSIONS[+$("selses").value || 0] : null; }
 function closingFor(title) { return CLOSINGS.find(c => c.label === title) || null; }
 
@@ -142,6 +247,7 @@ function buildClosingForm() {
   $("vamrow").hidden = !b.vam_test;
   $("dur").value = prev.duration_min ?? ""; $("rpe").value = prev.rpe ?? ""; $("cnote").value = prev.note ?? "";
   say("mc", prev.duration_min ? "Ya enviado hoy. Puedes corregirlo." : "", true);
+  if (!prev.duration_min && restaurarBorrador(`c|${s ? s.title : ""}|`)) say("mc", "Recuperé lo que tenías a medias. Revísalo y envíalo.", true);
 }
 function collectData() {
   const s = current(), b = (s && s.body) || {};
@@ -176,22 +282,71 @@ async function load() {
     if (!s.ok) { $("err").hidden = false; return; }
     $("hi").textContent = "Hola, " + s.label;
     $("app").hidden = false;
-    SESSIONS = s.sessions || []; CLOSINGS = s.closings || [];
+    SESSIONS = s.sessions || []; CLOSINGS = s.closings || []; WEEK = s.week || []; MOVED = !!s.moved; PREV = s.prev || null;
     if (s.wellness) {
       ITEMS.forEach(([k]) => { vals[k] = s.wellness[k]; $("s_" + k).value = s.wellness[k]; $("v_" + k).textContent = s.wellness[k]; });
       if (s.wellness.note) $("wnote").value = s.wellness.note;
       if (s.wellness.weight_kg) $("wkg").value = s.wellness.weight_kg;
       say("mw", "Ya enviado hoy. Puedes corregirlo.", true);
-    }
+    } else if (restaurarBorrador("w|")) say("mw", "Recuperé lo que tenías a medias. Revísalo y guárdalo.", true);
+    showWeek();
     showSessions();
+    showPend(s);
     if (SESSIONS.length > 1) {
       $("pick").hidden = false;
       $("selses").innerHTML = SESSIONS.map((x, i) => `<option value="${i}">${esc(x.title)}</option>`).join("");
       $("selses").onchange = buildClosingForm;
     }
     buildClosingForm();
+    cargarLogros();
   } catch (e) { $("err").textContent = "Sin conexión. Inténtalo de nuevo."; $("err").hidden = false; }
 }
+// ---- Constancia real (historial de la nube). Si la funcion no existe todavia, la tarjeta simplemente no aparece.
+let HIST = null;
+async function cargarLogros() {
+  try {
+    const h = await rpc("app_history", { p_token: TOKEN, p_day: DAY });
+    if (!h || !h.ok) return;
+    HIST = h;
+    const weeks = h.weeks || [], wk0 = weeks.length ? weeks[weeks.length - 1].week : null;
+    const mondayNow = (() => { const d = new Date(DAY + "T12:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); })();
+    // Semanas completas seguidas: se cuentan hacia atras las semanas ya terminadas con todas sus sesiones cerradas (la actual no rompe la racha).
+    let racha = 0;
+    for (let i = weeks.length - 1; i >= 0; i--) {
+      const w = weeks[i];
+      if (w.week === mondayNow) { if (w.total && w.done === w.total) racha++; continue; }
+      if (w.total && w.done === w.total) racha++; else break;
+    }
+    const cur = weeks.find(w => w.week === mondayNow);
+    const lines = [];
+    lines.push(`<div><b>${h.total_done || 0}</b> sesiones cerradas en total</div>`);
+    if (racha) lines.push(`<div><b>${racha}</b> semana${racha > 1 ? "s" : ""} completa${racha > 1 ? "s" : ""} seguida${racha > 1 ? "s" : ""}</div>`);
+    if (cur) lines.push(`<div>Esta semana: <b>${cur.done}</b> de ${cur.total}${cur.total && cur.done === cur.total ? " ✅ semana perfecta" : ""}</div>`);
+    if (!(h.total_done || 0) && !racha) lines.push(`<div class="muted small">Aquí irá sumando lo que vayas cerrando.</div>`);
+    $("logrosbody").innerHTML = lines.join("");
+    $("logros").hidden = false;
+  } catch (e) { /* sin historial: la tarjeta no se muestra */ }
+}
+$("bexp").onclick = () => {
+  if (!HIST) return;
+  const L = ["MI RESUMEN · " + ($("hi").textContent.replace("Hola, ", "")), "Generado el " + DAY, "", "Sesiones cerradas en total: " + (HIST.total_done || 0), "", "Últimas semanas (hechas / pautadas):"];
+  (HIST.weeks || []).slice().reverse().forEach(w => L.push(` ${w.week}: ${w.done} / ${w.total}`));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([L.join("\n")], { type: "text/plain;charset=utf-8" }));
+  a.download = "mi-resumen-" + DAY + ".txt";
+  document.body.appendChild(a); a.click(); a.remove();
+};
+$("bmsg").onclick = async () => {
+  const t = $("msgtxt").value.trim();
+  if (!t) { say("mmsg", "Escribe algo primero.", false); return; }
+  $("bmsg").disabled = true;
+  try {
+    const r = await rpc("submit_message", { p_token: TOKEN, p_message: t });
+    say("mmsg", r.ok ? "Enviado ✔ Tu entrenador lo leerá en cuanto abra su panel." : (r.error || "No se pudo enviar"), r.ok);
+    if (r.ok) $("msgtxt").value = "";
+  } catch (e) { say("mmsg", "No se pudo enviar: sin conexión o el servicio aún no está disponible. Tu texto sigue aquí; inténtalo de nuevo más tarde.", false); }
+  $("bmsg").disabled = false;
+};
 $("bw").onclick = async () => {
   $("bw").disabled = true;
   const kg = parseFloat($("wkg").value);
@@ -199,7 +354,8 @@ $("bw").onclick = async () => {
   try {
     const r = await rpc("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null, p_weight: kg >= 30 && kg <= 250 ? kg : null });
     say("mw", r.ok ? "Guardado. Gracias." : (r.error || "No se pudo guardar"), r.ok);
-  } catch (e) { say("mw", "Sin conexión. Inténtalo de nuevo.", false); }
+    if (r.ok) borrarBorrador("w|");
+  } catch (e) { say("mw", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
   $("bw").disabled = false;
 };
 $("bc").onclick = async () => {
@@ -210,7 +366,8 @@ $("bc").onclick = async () => {
     const s = current();
     const r = await rpc("submit_closing", { p_token: TOKEN, p_day: DAY, p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() });
     say("mc", r.ok ? "Enviado. Gracias." : (r.error || "No se pudo enviar"), r.ok);
-  } catch (e) { say("mc", "Sin conexión. Inténtalo de nuevo.", false); }
+    if (r.ok) borrarBorrador(`c|${s ? s.title : ""}|`);
+  } catch (e) { say("mc", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
   $("bc").disabled = false;
 };
 // ---- Capturas opcionales: se reducen en el movil (lado mayor 1600 px, JPEG) para que pesen poco antes de subirlas.
