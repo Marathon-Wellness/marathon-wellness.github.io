@@ -11,22 +11,23 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif;padding:16px;max-width:520px;margin-inline:auto}
 h1{font-size:1.3rem;margin:4px 0 2px}h2{font-size:1.05rem;margin:0 0 10px}h3{font-size:.98rem;margin:0 0 6px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
-.row{margin-bottom:14px}.row label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
+.row{margin-bottom:8px}.row label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:2px}
 .row .v{color:var(--ac);font-variant-numeric:tabular-nums}.hint{display:flex;justify-content:space-between;color:var(--mut);font-size:.75rem}
 input[type=range]{width:100%;accent-color:var(--ac)}
-input[type=number],textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+input[type=number],input[type=text],textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
 button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ac);color:#fff;font:600 1rem system-ui;cursor:pointer}button:disabled{opacity:.5}
 .msg{margin-top:10px;font-size:.92rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .ses h3{margin:0 0 6px;font-size:1rem}.ses ul{margin:0;padding-left:18px}.ses li{margin-bottom:3px}.muted{color:var(--mut)}.small{font-size:.85rem}
 .ex{border-top:1px solid var(--bd);padding:10px 0}.ex:first-of-type{border-top:0}.ex .t{font-weight:600}.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;margin-top:6px}
 label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
 .bar{height:8px;border-radius:6px;background:var(--bd);overflow:hidden;margin:6px 0 10px}.bar i{display:block;height:100%;background:var(--ok)}
-.wk{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--bd)}.wk:first-of-type{border-top:0}
-.wk .d{color:var(--mut);font-size:.85rem}.wk.hoy .t{font-weight:700}.wk .chg{width:auto;padding:6px 10px;font-size:.8rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
+.wk{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bd)}.wk:first-of-type{border-top:0}
+.wk .d{color:var(--mut);font-size:.8rem;white-space:nowrap}.wk .t{font-size:.95rem}.wk.hoy .t{font-weight:700}.wk .chg{width:auto;padding:6px 10px;font-size:.8rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
 .mv{border-top:1px solid var(--bd);padding:8px 0 4px}
 .rest{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-top:1px solid var(--bd);margin-top:10px;padding-top:10px}.rest button{width:auto;padding:6px 10px;font-size:.85rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
 #restv{font-variant-numeric:tabular-nums;font-weight:700;margin-left:auto}#restv.fin{color:var(--ok)}
 #offlinetag{background:#2b2410;border-color:#6b5420;color:#f0c36d;font-size:14px}#aviso18{background:#2b1614;border-color:#7a2f2a;color:#ff9d96;font-size:15px}button.sent{background:var(--ok)!important;transform:scale(1.03);transition:all .2s}
+summary{cursor:pointer;list-style:none;font-weight:700;font-size:1.05rem}summary::-webkit-details-marker{display:none}summary::after{content:"▾";float:right;color:var(--mut)}details[open]>summary::after{content:"▴"}details[open]>summary{margin-bottom:10px}summary .muted{font-weight:400}
 </style>
 </head>
 <body>
@@ -37,21 +38,21 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
 <div id="app" hidden>
   <div class="card" id="aviso18" hidden></div>
   <div class="card" id="pend" hidden></div>
-  <div class="card" id="week" hidden><h2>Mi semana</h2><div id="weekbody"></div><div class="msg" id="mm"></div></div>
+  <details class="card" id="week" hidden open><summary>Mi semana</summary><div id="weekbody"></div><div class="msg" id="mm"></div></details>
   <div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div>
     <div class="rest" id="rest" hidden><span class="muted small">⏱ Descanso entre series</span><button data-s="60">1:00</button><button data-s="90">1:30</button><button data-s="120">2:00</button><button data-s="180">3:00</button><span id="restv"></span></div></div>
   <div class="card" id="restday" hidden></div>
-  <div class="card">
-    <h2>¿Cómo estás hoy?</h2>
+  <details class="card" id="wcard" open>
+    <summary>¿Cómo estás hoy?</summary>
     <div id="sliders"></div>
     <div style="margin-bottom:14px"><label class="lb" for="wkg">Peso en ayunas (kg) · una vez por semana; si hoy no te pesas, déjalo vacío</label>
       <input id="wkg" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 80,5"></div>
     <textarea id="wnote" rows="2" maxlength="500" placeholder="Algo que quieras contar (opcional)"></textarea>
     <div style="height:10px"></div>
     <button id="bw">Guardar cómo estoy</button><div class="msg" id="mw"></div>
-  </div>
-  <div class="card">
-    <h2>Cerrar la sesión</h2>
+  </details>
+  <details class="card" id="ccard" open>
+    <summary>Cerrar la sesión</summary>
     <div id="pick" class="row" hidden><label class="lb" for="selses">¿Qué sesión cierras?</label><select id="selses"></select></div>
     <div id="strength" hidden></div>
     <div id="cardio" hidden>
@@ -76,27 +77,27 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
     <textarea id="cnote" rows="2" maxlength="500" placeholder="Molestias o cambios sobre lo pautado (opcional)"></textarea>
     <div style="height:10px"></div>
     <button id="bc">Enviar cierre</button><div class="msg" id="mc"></div>
-  </div>
-  <div class="card">
-    <h2>📷 ¿Prefieres mandar una captura? <span class="muted small">(opcional)</span></h2>
-    <div class="muted small" style="margin-bottom:10px">Una foto o captura de tus ejercicios de hoy (tu libreta, la app del gimnasio, el reloj…). La leemos y apuntamos las series por ti, así no hace falta que las rellenes arriba. Puedes mandar hasta 3 a la vez.</div>
+  </details>
+  <details class="card">
+    <summary>📷 Mandar una captura <span class="muted small">(opcional)</span></summary>
+    <div class="muted small" style="margin-bottom:10px">Una foto de tus ejercicios de hoy (libreta, app del gimnasio, reloj). Apuntamos las series por ti. Hasta 3 a la vez.</div>
     <input id="capfile" type="file" accept="image/*" multiple>
     <div id="capprev" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
     <button id="bcap" disabled>Enviar captura</button><div class="msg" id="mcap"></div>
-  </div>
+  </details>
   <div class="card" id="logros" hidden>
     <h2>🏅 Mi constancia</h2>
     <div id="logrosbody"></div>
     <div style="height:10px"></div>
     <button id="bexp">Descargar mi resumen</button>
   </div>
-  <div class="card">
-    <h2>💬 Mensaje a tu entrenador <span class="muted small">(opcional)</span></h2>
-    <div class="muted small" style="margin-bottom:10px">Para avisar de algo breve («hoy no puedo entrenar», «me molesta la rodilla»). No es un chat: lo leerá cuando abra su panel y no recibirás respuesta aquí.</div>
+  <details class="card">
+    <summary>💬 Mensaje a tu entrenador <span class="muted small">(opcional)</span></summary>
+    <div class="muted small" style="margin-bottom:10px">Algo breve («hoy no puedo», «me molesta la rodilla»). No es un chat: lo lee cuando abre su panel.</div>
     <textarea id="msgtxt" rows="2" maxlength="500" placeholder="Escribe tu mensaje"></textarea>
     <div style="height:10px"></div>
     <button id="bmsg">Enviar mensaje</button><div class="msg" id="mmsg"></div>
-  </div>
+  </details>
 </div>
 <script>
 // La clave "publishable" es publica por diseno: solo puede llamar a funciones que exigen tu token personal.
@@ -203,7 +204,7 @@ function showWeek() {
   const hechas = WEEK.filter(w => w.done).length, pct = Math.round(100 * hechas / WEEK.length);
   const libre = w => !w.done && !MOVED && w.day >= DAY && (w.moves || []).some(m => m >= DAY);
   $("weekbody").innerHTML = `<div><b>${hechas}</b> de ${WEEK.length} sesiones cerradas</div><div class="bar"><i style="width:${pct}%"></i></div>`
-    + WEEK.map((w, i) => `<div class="wk${w.day === DAY ? " hoy" : ""}" data-i="${i}"><div><div class="t">${w.done ? "✓ " : ""}${esc(w.title)}</div><div class="d">${fmtDay(w.day)}${w.day === DAY ? " · hoy" : ""}</div></div>${libre(w) ? `<button class="chg" data-i="${i}">Cambiar de día</button>` : ""}</div>`).join("")
+    + WEEK.map((w, i) => `<div class="wk${w.day === DAY ? " hoy" : ""}" data-i="${i}"><div class="t">${w.done ? "✓ " : ""}${esc(w.title)}</div><div class="d">${fmtDay(w.day)}${w.day === DAY ? " · hoy" : ""}</div>${libre(w) ? `<button class="chg" data-i="${i}">Cambiar de día</button>` : ""}</div>`).join("")
     + (MOVED ? `<div class="muted small" style="margin-top:8px">Ya usaste tu cambio de día de esta semana.</div>` : "")
     + (PREV && PREV.total > 0 ? `<div class="muted small" style="margin-top:8px">Semana pasada: ${PREV.done} de ${PREV.total} sesiones cerradas${PREV.done === PREV.total ? " 👏" : ""}.</div>` : "");
   document.querySelectorAll("#weekbody .chg").forEach(b => b.onclick = () => abrirCambio(+b.dataset.i));
@@ -243,6 +244,8 @@ function tickRest() {
 document.querySelectorAll("#rest button").forEach(b => b.onclick = () => { REST_END = Date.now() + (+b.dataset.s) * 1000; clearInterval(REST_T); REST_T = setInterval(tickRest, 250); tickRest(); });
 // ---- Lo que falta hoy (cómo estás / cierre de cada sesion) y, en dia de descanso, la proxima sesion.
 function showPend(s) {
+  $("wcard").open = !s.wellness;
+  $("ccard").open = SESSIONS.some(x => !closingFor(x.title));
   const falta = [];
   if (!s.wellness) falta.push("cómo estás hoy");
   SESSIONS.forEach(x => { if (!closingFor(x.title)) falta.push("el cierre de «" + x.title + "»"); });
@@ -373,7 +376,7 @@ async function cargarLogros() {
     }
     const cur = weeks.find(w => w.week === mondayNow);
     const lines = [];
-    lines.push(`<div><b>${h.total_done || 0}</b> sesiones cerradas en total</div>`);
+    lines.push(`<div><b>${h.total_done || 0}</b> sesión${(h.total_done || 0) === 1 ? "" : "es"} cerrada${(h.total_done || 0) === 1 ? "" : "s"} en total</div>`);
     if (racha) lines.push(`<div><b>${racha}</b> semana${racha > 1 ? "s" : ""} completa${racha > 1 ? "s" : ""} seguida${racha > 1 ? "s" : ""}</div>`);
     if (cur) lines.push(`<div>Esta semana: <b>${cur.done}</b> de ${cur.total}${cur.total && cur.done === cur.total ? " ✅ semana perfecta" : ""}</div>`);
     if (!(h.total_done || 0) && !racha) lines.push(`<div class="muted small">Aquí irá sumando lo que vayas cerrando.</div>`);
