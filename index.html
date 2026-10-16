@@ -26,13 +26,16 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
 .mv{border-top:1px solid var(--bd);padding:8px 0 4px}
 .rest{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-top:1px solid var(--bd);margin-top:10px;padding-top:10px}.rest button{width:auto;padding:6px 10px;font-size:.85rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
 #restv{font-variant-numeric:tabular-nums;font-weight:700;margin-left:auto}#restv.fin{color:var(--ok)}
+#offlinetag{background:#2b2410;border-color:#6b5420;color:#f0c36d;font-size:14px}#aviso18{background:#2b1614;border-color:#7a2f2a;color:#ff9d96;font-size:15px}button.sent{background:var(--ok)!important;transform:scale(1.03);transition:all .2s}
 </style>
 </head>
 <body>
 <h1 id="hi">Mi día</h1>
 <div class="sub" id="day"></div>
 <div id="err" class="card bad" hidden>Enlace no válido. Pídele a tu entrenador un enlace nuevo.</div>
+<div id="offlinetag" class="card" hidden></div>
 <div id="app" hidden>
+  <div class="card" id="aviso18" hidden></div>
   <div class="card" id="pend" hidden></div>
   <div class="card" id="week" hidden><h2>Mi semana</h2><div id="weekbody"></div><div class="msg" id="mm"></div></div>
   <div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div>
@@ -113,6 +116,40 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error("red");
   return r.json();
 }
+// ---- Cola sin conexion: si el envio falla por falta de red, se guarda en este movil y se reenvia solo al volver la conexion (con la pagina abierta).
+const QK = `mw_queue_${TOKEN}`;
+const loadQ = () => { try { return JSON.parse(localStorage.getItem(QK) || "[]"); } catch (e) { return []; } };
+const saveQ = q => { try { q.length ? localStorage.setItem(QK, JSON.stringify(q)) : localStorage.removeItem(QK); } catch (e) { /* sin almacenamiento: no hay cola */ } };
+async function enviar(fn, args, clave) {
+  try { return await rpc(fn, args); }
+  catch (e) {
+    const q = loadQ().filter(x => x.k !== clave); q.push({ k: clave, fn, args, day: DAY });
+    saveQ(q.slice(-20));
+    refrescarCola();
+    return { ok: true, queued: true };
+  }
+}
+let FLUSHING = false;
+async function vaciarCola() {
+  if (FLUSHING) return; FLUSHING = true;
+  try {
+    let q = loadQ(), enviados = 0;
+    while (q.length) {
+      try { await rpc(q[0].fn, q[0].args); enviados++; } catch (e) { break; }   // sigue sin red: se reintenta luego
+      q = q.slice(1); saveQ(q);
+    }
+    refrescarCola();
+    if (enviados) { $("offlinetag").textContent = "✔ Se enviaron " + enviados + " cosa" + (enviados > 1 ? "s" : "") + " que estaban pendientes."; $("offlinetag").hidden = false; setTimeout(refrescarCola, 6000); }
+  } finally { FLUSHING = false; }
+}
+function refrescarCola() {
+  const n = loadQ().length, t = $("offlinetag");
+  if (n) { t.textContent = "📡 " + n + " envío" + (n > 1 ? "s" : "") + " guardado" + (n > 1 ? "s" : "") + " en este móvil: se mandará solo al volver la conexión (deja esta página abierta)."; t.hidden = false; }
+  else t.hidden = navigator.onLine !== false;
+  if (!n && navigator.onLine === false) { t.textContent = "📡 Sin conexión. Lo que escribas se guarda en este móvil y se envía al volver."; t.hidden = false; }
+}
+window.addEventListener("online", vaciarCola);
+window.addEventListener("offline", refrescarCola);
 const vals = {};
 ITEMS.forEach(([k, name, lo, hi]) => {
   vals[k] = 4;
@@ -292,6 +329,7 @@ async function load() {
     showWeek();
     showSessions();
     showPend(s);
+    recordatorio(s);
     if (SESSIONS.length > 1) {
       $("pick").hidden = false;
       $("selses").innerHTML = SESSIONS.map((x, i) => `<option value="${i}">${esc(x.title)}</option>`).join("");
@@ -299,9 +337,23 @@ async function load() {
     }
     buildClosingForm();
     cargarLogros();
+    vaciarCola();
+    refrescarCola();
   } catch (e) { $("err").textContent = "Sin conexión. Inténtalo de nuevo."; $("err").hidden = false; }
 }
 // ---- Constancia real (historial de la nube). Si la funcion no existe todavia, la tarjeta simplemente no aparece.
+function confirmar(id, txt) {
+  const b = $(id), old = b.textContent;
+  b.textContent = txt; b.classList.add("sent");
+  setTimeout(() => { b.textContent = old; b.classList.remove("sent"); }, 2500);
+}
+// Recordatorio por la tarde: solo si hoy hay algo pendiente (no avisa en dias de descanso ni si ya esta todo enviado).
+function recordatorio(s) {
+  const falta = (!s.wellness ? 1 : 0) + SESSIONS.filter(x => !closingFor(x.title)).length, a = $("aviso18");
+  const h = new Date().getHours();
+  a.hidden = !(falta && h >= 18);
+  if (!a.hidden) a.innerHTML = "⏰ Ya es de tarde y aún no has enviado todo lo de hoy. Son 2 minutos: cuéntanos cómo estás y cierra la sesión.";
+}
 let HIST = null;
 async function cargarLogros() {
   try {
@@ -341,20 +393,21 @@ $("bmsg").onclick = async () => {
   if (!t) { say("mmsg", "Escribe algo primero.", false); return; }
   $("bmsg").disabled = true;
   try {
-    const r = await rpc("submit_message", { p_token: TOKEN, p_message: t });
-    say("mmsg", r.ok ? "Enviado ✔ Tu entrenador lo leerá en cuanto abra su panel." : (r.error || "No se pudo enviar"), r.ok);
-    if (r.ok) $("msgtxt").value = "";
+    const r = await enviar("submit_message", { p_token: TOKEN, p_message: t }, "m|" + Date.now());
+    say("mmsg", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Enviado ✔ Tu entrenador lo leerá en cuanto abra su panel.") : (r.error || "No se pudo enviar"), r.ok);
+    if (r.ok) { $("msgtxt").value = ""; if (!r.queued) confirmar("bmsg", "✔ Enviado"); }
   } catch (e) { say("mmsg", "No se pudo enviar: sin conexión o el servicio aún no está disponible. Tu texto sigue aquí; inténtalo de nuevo más tarde.", false); }
   $("bmsg").disabled = false;
 };
 $("bw").onclick = async () => {
+  if (ITEMS.some(([k]) => !(vals[k] >= 1 && vals[k] <= 7))) { say("mw", "Revisa los deslizadores: cada uno va de 1 a 7.", false); return; }
   $("bw").disabled = true;
   const kg = parseFloat($("wkg").value);
   if ($("wkg").value && !(kg >= 30 && kg <= 250)) { say("mw", "El peso debe estar entre 30 y 250 kg.", false); $("bw").disabled = false; return; }
   try {
-    const r = await rpc("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null, p_weight: kg >= 30 && kg <= 250 ? kg : null });
-    say("mw", r.ok ? "Guardado. Gracias." : (r.error || "No se pudo guardar"), r.ok);
-    if (r.ok) borrarBorrador("w|");
+    const r = await enviar("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null, p_weight: kg >= 30 && kg <= 250 ? kg : null }, "w|" + DAY);
+    say("mw", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Guardado. Gracias.") : (r.error || "No se pudo guardar"), r.ok);
+    if (r.ok) { borrarBorrador("w|"); if (!r.queued) confirmar("bw", "✔ Enviado"); }
   } catch (e) { say("mw", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
   $("bw").disabled = false;
 };
@@ -364,9 +417,9 @@ $("bc").onclick = async () => {
   $("bc").disabled = true;
   try {
     const s = current();
-    const r = await rpc("submit_closing", { p_token: TOKEN, p_day: DAY, p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() });
-    say("mc", r.ok ? "Enviado. Gracias." : (r.error || "No se pudo enviar"), r.ok);
-    if (r.ok) borrarBorrador(`c|${s ? s.title : ""}|`);
+    const r = await enviar("submit_closing", { p_token: TOKEN, p_day: DAY, p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() }, "c|" + DAY + "|" + (s ? s.title : ""));
+    say("mc", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Enviado. Gracias.") : (r.error || "No se pudo enviar"), r.ok);
+    if (r.ok) { borrarBorrador(`c|${s ? s.title : ""}|`); if (!r.queued) confirmar("bc", "✔ Enviado"); }
   } catch (e) { say("mc", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
   $("bc").disabled = false;
 };
