@@ -45,7 +45,7 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
     <h2>¿Cómo estás hoy?</h2>
     <div id="sliders"></div>
     <div style="margin-bottom:14px"><label class="lb" for="wkg">Peso en ayunas (kg) · una vez por semana; si hoy no te pesas, déjalo vacío</label>
-      <input id="wkg" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="Ej.: 80.5"></div>
+      <input id="wkg" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 80,5"></div>
     <textarea id="wnote" rows="2" maxlength="500" placeholder="Algo que quieras contar (opcional)"></textarea>
     <div style="height:10px"></div>
     <button id="bw">Guardar cómo estoy</button><div class="msg" id="mw"></div>
@@ -57,7 +57,7 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
     <div id="cardio" hidden>
       <h3>Datos del cardio <span class="muted small">(del resumen del reloj)</span></h3>
       <div class="three">
-        <div><label class="lb">Distancia (km)</label><input id="dist" type="number" inputmode="decimal" min="0" step="0.01"></div>
+        <div><label class="lb">Distancia (km)</label><input id="dist" type="text" inputmode="decimal" autocomplete="off"></div>
         <div><label class="lb">FC media</label><input id="hravg" type="number" inputmode="numeric" min="30" max="230"></div>
         <div><label class="lb">FC pico</label><input id="hrmax" type="number" inputmode="numeric" min="30" max="230"></div>
       </div>
@@ -65,12 +65,12 @@ label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
         <div><label class="lb">Desnivel acumulado (m)</label><input id="elev" type="number" inputmode="numeric" min="0" max="5000" placeholder="Opcional"></div>
         <div style="display:flex;align-items:end"><label class="lb" style="display:flex;gap:8px;align-items:center;margin:0 0 10px"><input id="stops" type="checkbox" style="width:auto"> Hice paradas</label></div>
       </div>
-      <div id="vamrow" hidden style="margin-top:10px"><label class="lb">Test de 6 minutos: kilómetros recorridos SOLO en esos 6 min</label><input id="vamd" type="number" inputmode="decimal" min="0" max="3" step="0.01" placeholder="Ej.: 1.25"></div>
+      <div id="vamrow" hidden style="margin-top:10px"><label class="lb">Test de 6 minutos: kilómetros recorridos SOLO en esos 6 min</label><input id="vamd" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 1.25"></div>
       <div style="height:14px"></div>
     </div>
     <div class="two">
       <div><label class="lb">Duración (min)</label><input id="dur" type="number" inputmode="numeric" min="1" max="600"></div>
-      <div><label class="lb">Esfuerzo global (1-10)</label><input id="rpe" type="number" inputmode="decimal" min="1" max="10" step="0.5"></div>
+      <div><label class="lb">Esfuerzo global (1-10)</label><input id="rpe" type="text" inputmode="decimal" autocomplete="off"></div>
     </div>
     <div style="height:10px"></div>
     <textarea id="cnote" rows="2" maxlength="500" placeholder="Molestias o cambios sobre lo pautado (opcional)"></textarea>
@@ -110,6 +110,8 @@ const TOKEN = (q.get("t") || (H.includes("-") ? H.split("-").pop() : H)).replace
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
 const DAY = today();
 const $ = id => document.getElementById(id);
+// Decimales: se admite coma o punto (76,7 o 76.7).
+const num = v => parseFloat(String(v ?? "").trim().replace(",", "."));
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 async function rpc(fn, args) {
   const r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, { method: "POST", headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" }, body: JSON.stringify(args) });
@@ -272,7 +274,7 @@ function buildClosingForm() {
         const reps = [...Array(e.sets)].map((_, j) => `<input type="number" inputmode="numeric" min="1" max="100" placeholder="rep ${j + 1}" data-ex="${i}" data-set="${j}" value="${(old.reps || [])[j] ?? ""}">`).join("");
         const kgTxt = e.kg ? `pautado ${e.kg} kg${e.per_hand ? " por mano" : ""}` : (e.kg === 0 ? "peso corporal" : "peso a tantear");
         return `<div class="ex"><div class="t">${esc(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min === e.rep_max ? e.rep_min : e.rep_min + "-" + e.rep_max} · ${kgTxt}</div>
-          <div class="two" style="margin-top:6px"><div><label class="lb">Kilos${e.per_hand ? " (por mano)" : ""}${e.kg === 0 ? " (0 = peso corporal)" : ""}</label><input type="number" inputmode="decimal" min="0" step="0.5" id="kg_${i}" value="${kgv}"></div></div>
+          <div class="two" style="margin-top:6px"><div><label class="lb">Kilos${e.per_hand ? " (por mano)" : ""}${e.kg === 0 ? " (0 = peso corporal)" : ""}</label><input type="text" inputmode="decimal" autocomplete="off" id="kg_${i}" value="${kgv}"></div></div>
           <label class="lb" style="margin-top:6px">Repeticiones de cada serie</label><div class="sets">${reps}</div></div>`;
       }).join("") + `<div style="height:14px"></div>`;
     }
@@ -294,7 +296,7 @@ function collectData() {
   need.forEach((e, i) => {
     const reps = [...document.querySelectorAll(`input[data-ex="${i}"]`)].map(x => parseInt(x.value, 10)).filter(n => n >= 1 && n <= 100);
     if (!reps.length) return;
-    const kg = parseFloat($("kg_" + i).value);
+    const kg = num($("kg_" + i).value);
     sets.push({ ex: e.name, kg: kg >= 0 ? kg : null, reps });
   });
   if (sets.length) data.sets = sets;
@@ -303,9 +305,9 @@ function collectData() {
   const comoPautado = (b.ex || []).filter(e => !hechos.has(e.name)).map(e => e.name);
   if (comoPautado.length && (b.ex || []).length) data.as_planned = comoPautado;
   if (b.cardio) {
-    const c = {}, d = parseFloat($("dist").value), a = parseInt($("hravg").value, 10), m = parseInt($("hrmax").value, 10);
+    const c = {}, d = num($("dist").value), a = parseInt($("hravg").value, 10), m = parseInt($("hrmax").value, 10);
     if (d > 0) c.distance_km = d; if (a >= 30) c.hr_avg = a; if (m >= 30) c.hr_max = m;
-    const el = parseFloat($("elev").value), vd = parseFloat($("vamd").value);
+    const el = num($("elev").value), vd = num($("vamd").value);
     if (el >= 0) c.elev_gain = el; if ($("stops").checked) c.stops = true; if (b.vam_test && vd > 0) c.vam_dist_km = vd;
     if (Object.keys(c).length) data.cardio = c;
   }
@@ -402,7 +404,7 @@ $("bmsg").onclick = async () => {
 $("bw").onclick = async () => {
   if (ITEMS.some(([k]) => !(vals[k] >= 1 && vals[k] <= 7))) { say("mw", "Revisa los deslizadores: cada uno va de 1 a 7.", false); return; }
   $("bw").disabled = true;
-  const kg = parseFloat($("wkg").value);
+  const kg = num($("wkg").value);
   if ($("wkg").value && !(kg >= 30 && kg <= 250)) { say("mw", "El peso debe estar entre 30 y 250 kg.", false); $("bw").disabled = false; return; }
   try {
     const r = await enviar("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null, p_weight: kg >= 30 && kg <= 250 ? kg : null }, "w|" + DAY);
@@ -412,7 +414,7 @@ $("bw").onclick = async () => {
   $("bw").disabled = false;
 };
 $("bc").onclick = async () => {
-  const dur = parseInt($("dur").value, 10), rpe = parseFloat($("rpe").value);
+  const dur = parseInt($("dur").value, 10), rpe = num($("rpe").value);
   if (!(dur >= 1 && dur <= 600) || !(rpe >= 1 && rpe <= 10)) { say("mc", "Pon la duración (1-600 min) y el esfuerzo (1-10).", false); return; }
   $("bc").disabled = true;
   try {
