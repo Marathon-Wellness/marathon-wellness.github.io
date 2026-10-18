@@ -391,7 +391,7 @@ async function cargarLogros() {
     }
     const cur = weeks.find(w => w.week === mondayNow);
     const lines = [];
-    lines.push(`<div><b>${h.total_done || 0}</b> sesión${(h.total_done || 0) === 1 ? "" : "es"} cerrada${(h.total_done || 0) === 1 ? "" : "s"} en total</div>`);
+    lines.push(`<div><b>${h.total_done || 0}</b> ${(h.total_done || 0) === 1 ? "sesión" : "sesiones"} ${(h.total_done || 0) === 1 ? "cerrada" : "cerradas"} en total</div>`);
     if (racha) lines.push(`<div><b>${racha}</b> semana${racha > 1 ? "s" : ""} completa${racha > 1 ? "s" : ""} seguida${racha > 1 ? "s" : ""}</div>`);
     if (cur) lines.push(`<div>Esta semana: <b>${cur.done}</b> de ${cur.total}${cur.total && cur.done === cur.total ? " ✅ semana perfecta" : ""}</div>`);
     if (!(h.total_done || 0) && !racha) lines.push(`<div class="muted small">Aquí irá sumando lo que vayas cerrando.</div>`);
