@@ -54,6 +54,7 @@ summary{cursor:pointer;list-style:none;font-weight:700;font-size:1.05rem}summary
   <details class="card" id="ccard" open>
     <summary>Cerrar la sesión</summary>
     <div id="pick" class="row" hidden><label class="lb" for="selses">¿Qué sesión cierras?</label><select id="selses"></select></div>
+    <div id="cdayrow" class="row" hidden><label class="lb" for="cday">¿Qué día la hiciste?</label><select id="cday"></select></div>
     <div id="strength" hidden></div>
     <div id="cardio" hidden>
       <h3>Datos del cardio <span class="muted small">(del resumen del reloj)</span></h3>
@@ -194,7 +195,7 @@ function restaurarBorrador(prefix) {
 $("app").addEventListener("input", guardarBorrador);
 $("app").addEventListener("change", guardarBorrador);
 
-let SESSIONS = [], CLOSINGS = [], WEEK = [], MOVED = false, PREV = null;
+let SESSIONS = [], PENDING = [], CLOSINGS = [], WEEK = [], MOVED = false, PREV = null;
 const DOW = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const fmtDay = iso => { const d = new Date(iso + "T12:00:00"); return DOW[d.getDay()] + " " + d.getDate() + "/" + String(d.getMonth() + 1).padStart(2, "0"); };
 // Resumen de la semana y «cambiar mi dia»: la nube solo ofrece los dias que el entrenador (su revisor de semana) deja libres de choques.
@@ -245,10 +246,11 @@ document.querySelectorAll("#rest button").forEach(b => b.onclick = () => { REST_
 // ---- Lo que falta hoy (cómo estás / cierre de cada sesion) y, en dia de descanso, la proxima sesion.
 function showPend(s) {
   $("wcard").open = !s.wellness;
-  $("ccard").open = SESSIONS.some(x => !closingFor(x.title));
+  $("ccard").open = SESSIONS.some(x => !closingFor(x.title)) || PENDING.length > 0;
   const falta = [];
   if (!s.wellness) falta.push("cómo estás hoy");
   SESSIONS.forEach(x => { if (!closingFor(x.title)) falta.push("el cierre de «" + x.title + "»"); });
+  PENDING.forEach(x => falta.push("el cierre pendiente de «" + x.title + "» (" + fmtDay(x.day) + ")"));
   $("pend").hidden = !falta.length;
   $("pend").innerHTML = falta.length ? `<b>Te falta hoy:</b> ${falta.map(esc).join(" · ")}` : "";
   const rd = $("restday");
@@ -256,7 +258,19 @@ function showPend(s) {
   if (!SESSIONS.length) rd.innerHTML = `<h2>Hoy toca descanso</h2><div class="muted">${s.next ? `Tu próxima sesión: <b>${esc(s.next.title)}</b> · ${fmtDay(s.next.day)}.` : "Aprovecha para recuperar bien."}</div>`;
 }
 
-function current() { return SESSIONS.length ? SESSIONS[+$("selses").value || 0] : null; }
+// Se puede cerrar la sesion de hoy o una pendiente de esta semana que se hizo otro dia (con sus series), escogiendo el dia real (hoy, ayer o anteayer).
+const closables = () => SESSIONS.concat(PENDING);
+function current() { const L = closables(); return L.length ? L[+$("selses").value || 0] : null; }
+const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+function closeDay() { const s = current(); return s && s._pend ? $("cday").value : DAY; }
+function fillCday() {
+  const s = current(), row = $("cdayrow");
+  row.hidden = !(s && s._pend);
+  if (row.hidden) return;
+  const opts = [0, -1, -2].map(n => addDays(DAY, n));
+  $("cday").innerHTML = opts.map(d => `<option value="${d}">${d === DAY ? "hoy" : fmtDay(d)}</option>`).join("");
+  $("cday").value = opts.includes(s.day) ? s.day : addDays(DAY, -2);
+}
 function closingFor(title) { return CLOSINGS.find(c => c.label === title) || null; }
 
 // Solo se piden series de los ejercicios cuyo peso o repeticiones NO estan fijados (a tantear, estimado o rango).
@@ -324,7 +338,7 @@ async function load() {
     if (!s.ok) { $("err").hidden = false; return; }
     $("hi").textContent = "Hola, " + s.label;
     $("app").hidden = false;
-    SESSIONS = s.sessions || []; CLOSINGS = s.closings || []; WEEK = s.week || []; MOVED = !!s.moved; PREV = s.prev || null;
+    SESSIONS = s.sessions || []; PENDING = (s.pending || []).map(x => ({ ...x, _pend: true })); CLOSINGS = s.closings || []; WEEK = s.week || []; MOVED = !!s.moved; PREV = s.prev || null;
     if (s.wellness) {
       ITEMS.forEach(([k]) => { vals[k] = s.wellness[k]; $("s_" + k).value = s.wellness[k]; $("v_" + k).textContent = s.wellness[k]; });
       if (s.wellness.note) $("wnote").value = s.wellness.note;
@@ -335,11 +349,12 @@ async function load() {
     showSessions();
     showPend(s);
     recordatorio(s);
-    if (SESSIONS.length > 1) {
+    if (closables().length > 1) {
       $("pick").hidden = false;
-      $("selses").innerHTML = SESSIONS.map((x, i) => `<option value="${i}">${esc(x.title)}</option>`).join("");
-      $("selses").onchange = buildClosingForm;
+      $("selses").innerHTML = closables().map((x, i) => `<option value="${i}">${esc(x.title)}${x._pend ? " (pendiente del " + fmtDay(x.day) + ")" : ""}</option>`).join("");
+      $("selses").onchange = () => { fillCday(); buildClosingForm(); };
     }
+    fillCday();
     buildClosingForm();
     cargarLogros();
     vaciarCola();
@@ -422,7 +437,7 @@ $("bc").onclick = async () => {
   $("bc").disabled = true;
   try {
     const s = current();
-    const r = await enviar("submit_closing", { p_token: TOKEN, p_day: DAY, p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() }, "c|" + DAY + "|" + (s ? s.title : ""));
+    const r = await enviar("submit_closing", { p_token: TOKEN, p_day: closeDay(), p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() }, "c|" + closeDay() + "|" + (s ? s.title : ""));
     say("mc", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Enviado. Gracias.") : (r.error || "No se pudo enviar"), r.ok);
     if (r.ok) { borrarBorrador(`c|${s ? s.title : ""}|`); if (!r.queued) confirmar("bc", "✔ Enviado"); }
   } catch (e) { say("mc", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
