@@ -86,6 +86,15 @@ summary{cursor:pointer;list-style:none;font-weight:700;font-size:1.05rem}summary
     <div id="capprev" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
     <button id="bcap" disabled>Enviar captura</button><div class="msg" id="mcap"></div>
   </details>
+  <details class="card">
+    <summary>⌚ Subir la actividad de mi reloj <span class="muted small">(opcional)</span></summary>
+    <div class="muted small" style="margin-bottom:10px">Si corriste o caminaste con reloj, exporta la actividad desde su app («exportar TCX» o «GPX») y súbela aquí: tu entrenador lee la distancia, el tiempo y el pulso. Máximo 3 MB.</div>
+    <label class="lb" for="actday">¿Qué día fue?</label><select id="actday"></select>
+    <div style="height:8px"></div>
+    <input id="actfile" type="file" accept=".tcx,.gpx">
+    <div style="height:10px"></div>
+    <button id="bact">Enviar actividad</button><div class="msg" id="mact"></div>
+  </details>
   <div class="card" id="logros" hidden>
     <h2>🏅 Mi constancia</h2>
     <div id="logrosbody"></div>
@@ -263,6 +272,27 @@ const closables = () => SESSIONS.concat(PENDING);
 function current() { const L = closables(); return L.length ? L[+$("selses").value || 0] : null; }
 const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 function closeDay() { const s = current(); return s && s._pend ? $("cday").value : DAY; }
+// ---- Actividad del reloj (.tcx/.gpx): el archivo se envia tal cual (en base64) y el entrenador lo valida y lo lee en su PC.
+function fillActDay() { $("actday").innerHTML = [0, -1, -2].map(n => { const d = addDays(DAY, n); return `<option value="${d}">${n === 0 ? "hoy" : fmtDay(d)}</option>`; }).join(""); }
+async function archivoABase64(file) {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  let s = "";
+  for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+$("bact").onclick = async () => {
+  const f = $("actfile").files[0];
+  if (!f) { say("mact", "Elige primero el archivo de tu reloj.", false); return; }
+  if (!/\.(tcx|gpx)$/i.test(f.name)) { say("mact", "Solo se admiten archivos .tcx o .gpx.", false); return; }
+  if (f.size > 2900000) { say("mact", "El archivo pesa más de 3 MB: exporta solo esa actividad.", false); return; }
+  $("bact").disabled = true;
+  try {
+    const r = await rpc("submit_activity", { p_token: TOKEN, p_day: $("actday").value, p_filename: f.name, p_content: await archivoABase64(f), p_note: null });
+    say("mact", r.ok ? "Enviada ✔ Tu entrenador la leerá en cuanto abra su panel." : (r.error || "No se pudo enviar"), r.ok);
+    if (r.ok) { $("actfile").value = ""; confirmar("bact", "✔ Enviada"); }
+  } catch (e) { say("mact", "No se pudo enviar: sin conexión o el servicio aún no está disponible. Inténtalo de nuevo más tarde.", false); }
+  $("bact").disabled = false;
+};
 function fillCday() {
   const s = current(), row = $("cdayrow");
   row.hidden = !(s && s._pend);
@@ -355,6 +385,7 @@ async function load() {
       $("selses").onchange = () => { fillCday(); buildClosingForm(); };
     }
     fillCday();
+    fillActDay();
     buildClosingForm();
     cargarLogros();
     vaciarCola();
