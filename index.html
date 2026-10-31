@@ -5,514 +5,88 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Mi día</title>
-<style>
-:root{--bg:#0f1115;--card:#181c23;--tx:#eef1f6;--mut:#8b93a3;--ac:#4aa3ff;--ok:#3ecf8e;--bad:#ff6b6b;--bd:#262c37}
-@media (prefers-color-scheme:light){:root{--bg:#f4f6fa;--card:#fff;--tx:#161a22;--mut:#667085;--bd:#e3e7ee}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif;padding:16px;max-width:520px;margin-inline:auto}
-h1{font-size:1.3rem;margin:4px 0 2px}h2{font-size:1.05rem;margin:0 0 10px}h3{font-size:.98rem;margin:0 0 6px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
-.row{margin-bottom:8px}.row label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:2px}
-.row .v{color:var(--ac);font-variant-numeric:tabular-nums}.hint{display:flex;justify-content:space-between;color:var(--mut);font-size:.75rem}
-input[type=range]{width:100%;accent-color:var(--ac)}
-input[type=number],input[type=text],textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
-button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ac);color:#fff;font:600 1rem system-ui;cursor:pointer}button:disabled{opacity:.5}
-.msg{margin-top:10px;font-size:.92rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.ses h3{margin:0 0 6px;font-size:1rem}.ses ul{margin:0;padding-left:18px}.ses li{margin-bottom:3px}.muted{color:var(--mut)}.small{font-size:.85rem}
-.ex{border-top:1px solid var(--bd);padding:10px 0}.ex:first-of-type{border-top:0}.ex .t{font-weight:600}.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;margin-top:6px}
-label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}
-.bar{height:8px;border-radius:6px;background:var(--bd);overflow:hidden;margin:6px 0 10px}.bar i{display:block;height:100%;background:var(--ok)}
-.wk{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bd)}.wk:first-of-type{border-top:0}
-.wk .d{color:var(--mut);font-size:.8rem;white-space:nowrap}.wk .t{font-size:.95rem}.wk.hoy .t{font-weight:700}.wk .chg{width:auto;padding:6px 10px;font-size:.8rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
-.mv{border-top:1px solid var(--bd);padding:8px 0 4px}
-.rest{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-top:1px solid var(--bd);margin-top:10px;padding-top:10px}.rest button{width:auto;padding:6px 10px;font-size:.85rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}
-#restv{font-variant-numeric:tabular-nums;font-weight:700;margin-left:auto}#restv.fin{color:var(--ok)}
-#offlinetag{background:#2b2410;border-color:#6b5420;color:#f0c36d;font-size:14px}#aviso18{background:#2b1614;border-color:#7a2f2a;color:#ff9d96;font-size:15px}button.sent{background:var(--ok)!important;transform:scale(1.03);transition:all .2s}
-summary{cursor:pointer;list-style:none;font-weight:700;font-size:1.05rem}summary::-webkit-details-marker{display:none}summary::after{content:"▾";float:right;color:var(--mut)}details[open]>summary::after{content:"▴"}details[open]>summary{margin-bottom:10px}summary .muted{font-weight:400}
-</style>
+<style>:root{--bg:#0f1115;--card:#181c23;--tx:#eef1f6;--mut:#8b93a3;--ac:#4aa3ff;--ok:#3ecf8e;--bad:#ff6b6b;--bd:#262c37}@media (prefers-color-scheme:light){:root{--bg:#f4f6fa;--card:#fff;--tx:#161a22;--mut:#667085;--bd:#e3e7ee}}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif;padding:16px;max-width:520px;margin-inline:auto}h1{font-size:1.3rem;margin:4px 0 2px}h2{font-size:1.05rem;margin:0 0 10px}h3{font-size:.98rem;margin:0 0 6px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}.row{margin-bottom:8px}.row label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:2px}.row .v{color:var(--ac);font-variant-numeric:tabular-nums}.hint{display:flex;justify-content:space-between;color:var(--mut);font-size:.75rem}input[type=range]{width:100%;accent-color:var(--ac)}input[type=number],input[type=text],textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}button{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ac);color:#fff;font:600 1rem system-ui;cursor:pointer}button:disabled{opacity:.5}.msg{margin-top:10px;font-size:.92rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.ses h3{margin:0 0 6px;font-size:1rem}.ses ul{margin:0;padding-left:18px}.ses li{margin-bottom:3px}.muted{color:var(--mut)}.small{font-size:.85rem}.ex{border-top:1px solid var(--bd);padding:10px 0}.ex:first-of-type{border-top:0}.ex .t{font-weight:600}.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;margin-top:6px}label.lb{display:block;color:var(--mut);font-size:.8rem;margin-bottom:3px}.rp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}.rp button{min-height:56px;padding:8px 4px;background:transparent;color:var(--tx);border:2px solid var(--mut);font:600 .85rem/1.2 system-ui}.rp button[data-v="0"]{border-color:#d64545}.rp button[data-v="1-3"]{border-color:#e0a000}.rp button[data-v="4+"]{border-color:#3a9d5d}.rp button[aria-checked="true"]::before{content:"¹3 "}.rp button[aria-checked="true"][data-v="0"]{background:#c62828;color:#fff}.rp button[aria-checked="true"][data-v="1-3"]{background:#ffb300;color:#1a1a1a}.rp button[aria-checked="true"][data-v="4+"]{background:#2e7d32;color:#fff}.bar{height:8px;border-radius:6px;background:var(--bd);overflow:hidden;margin:6px 0 10px}.bar i{display:block;height:100%;background:var(--ok)}.wk{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bd)}.wk:first-of-type{border-top:0}.wk .d{color:var(--mut);font-size:.8rem;white-space:nowrap}.wk .t{font-size:.95rem}.wk.hoy .t{font-weight:700}.wk .chg{width:auto;padding:6px 10px;font-size:.8rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}.mv{border-top:1px solid var(--bd);padding:8px 0 4px}.rest{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-top:1px solid var(--bd);margin-top:10px;padding-top:10px}.rest button{width:auto;padding:6px 10px;font-size:.85rem;background:transparent;color:var(--ac);border:1px solid var(--ac)}#restv{font-variant-numeric:tabular-nums;font-weight:700;margin-left:auto}#restv.fin{color:var(--ok)}#offlinetag{background:#2b2410;border-color:#6b5420;color:#f0c36d;font-size:14px}#aviso18{background:#2b1614;border-color:#7a2f2a;color:#ff9d96;font-size:15px}button.sent{background:var(--ok)!important;transform:scale(1.03);transition:all .2s}.callout{background:var(--bg);border-left:3px solid var(--ac);border-radius:8px;padding:8px 10px;margin-top:10px;font-size:.9rem;white-space:pre-line}.det{margin:8px 0}.det summary{font-size:.92rem;color:var(--ac)}summary{cursor:pointer;list-style:none;font-weight:700;font-size:1.05rem}summary::-webkit-details-marker{display:none}summary::after{content:"▾";float:right;color:var(--mut)}details[open]>summary::after{content:"▴"}details[open]>summary{margin-bottom:10px}summary .muted{font-weight:400}#verbanner{position:fixed;top:0;left:0;right:0;z-index:99;background:#ffb300;color:#1a1a1a;padding:10px 16px;font:700 .92rem/1.3 system-ui,sans-serif;text-align:center;border-bottom:2px solid #7a5600}body.ver{padding-top:64px}button:disabled{cursor:not-allowed}</style>
 </head>
 <body>
+<div id="verbanner" role="status" aria-live="polite" hidden></div>
 <h1 id="hi">Mi día</h1>
 <div class="sub" id="day"></div>
 <div id="err" class="card bad" hidden>Enlace no válido. Pídele a tu entrenador un enlace nuevo.</div>
 <div id="offlinetag" class="card" hidden></div>
 <div id="app" hidden>
-  <div class="card" id="aviso18" hidden></div>
-  <div class="card" id="pend" hidden></div>
-  <details class="card" id="week" hidden open><summary>Mi semana</summary><div id="weekbody"></div><div class="msg" id="mm"></div></details>
-  <div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div>
-    <div class="rest" id="rest" hidden><span class="muted small">⏱ Descanso entre series</span><button data-s="60">1:00</button><button data-s="90">1:30</button><button data-s="120">2:00</button><button data-s="180">3:00</button><span id="restv"></span></div></div>
-  <div class="card" id="restday" hidden></div>
-  <details class="card" id="wcard" open>
-    <summary>¿Cómo estás hoy?</summary>
-    <div id="sliders"></div>
-    <div style="margin-bottom:14px"><label class="lb" for="wkg">Peso en ayunas (kg) · una vez por semana; si hoy no te pesas, déjalo vacío</label>
-      <input id="wkg" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 80,5"></div>
-    <textarea id="wnote" rows="2" maxlength="500" placeholder="Algo que quieras contar (opcional)"></textarea>
-    <div style="height:10px"></div>
-    <button id="bw">Guardar cómo estoy</button><div class="msg" id="mw"></div>
-  </details>
-  <details class="card" id="ccard" open>
-    <summary>Cerrar la sesión</summary>
-    <div id="pick" class="row" hidden><label class="lb" for="selses">¿Qué sesión cierras?</label><select id="selses"></select></div>
-    <div id="cdayrow" class="row" hidden><label class="lb" for="cday">¿Qué día la hiciste?</label><select id="cday"></select></div>
-    <div id="strength" hidden></div>
-    <div id="cardio" hidden>
-      <h3>Datos del cardio <span class="muted small">(del resumen del reloj)</span></h3>
-      <div class="three">
-        <div><label class="lb">Distancia (km)</label><input id="dist" type="text" inputmode="decimal" autocomplete="off"></div>
-        <div><label class="lb">FC media</label><input id="hravg" type="number" inputmode="numeric" min="30" max="230"></div>
-        <div><label class="lb">FC pico</label><input id="hrmax" type="number" inputmode="numeric" min="30" max="230"></div>
-      </div>
-      <div class="two" style="margin-top:10px">
-        <div><label class="lb">Desnivel acumulado (m)</label><input id="elev" type="number" inputmode="numeric" min="0" max="5000" placeholder="Opcional"></div>
-        <div style="display:flex;align-items:end"><label class="lb" style="display:flex;gap:8px;align-items:center;margin:0 0 10px"><input id="stops" type="checkbox" style="width:auto"> Hice paradas</label></div>
-      </div>
-      <div id="vamrow" hidden style="margin-top:10px"><label class="lb">Test de 6 minutos: kilómetros recorridos SOLO en esos 6 min</label><input id="vamd" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 1.25"></div>
-      <div style="height:14px"></div>
-    </div>
-    <div class="two">
-      <div><label class="lb">Duración (min)</label><input id="dur" type="number" inputmode="numeric" min="1" max="600"></div>
-      <div><label class="lb">Esfuerzo global (1-10)</label><input id="rpe" type="text" inputmode="decimal" autocomplete="off"></div>
-    </div>
-    <div style="height:10px"></div>
-    <textarea id="cnote" rows="2" maxlength="500" placeholder="Molestias o cambios sobre lo pautado (opcional)"></textarea>
-    <div style="height:10px"></div>
-    <button id="bc">Enviar cierre</button><div class="msg" id="mc"></div>
-  </details>
-  <details class="card">
-    <summary>📷 Mandar una captura <span class="muted small">(opcional)</span></summary>
-    <div class="muted small" style="margin-bottom:10px">Una foto de tus ejercicios de hoy (libreta, app del gimnasio, reloj). Apuntamos las series por ti. Hasta 3 a la vez.</div>
-    <input id="capfile" type="file" accept="image/*" multiple>
-    <div id="capprev" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
-    <button id="bcap" disabled>Enviar captura</button><div class="msg" id="mcap"></div>
-  </details>
-  <details class="card">
-    <summary>⌚ Subir la actividad de mi reloj <span class="muted small">(opcional)</span></summary>
-    <div class="muted small" style="margin-bottom:10px">Si corriste o caminaste con reloj, exporta la actividad desde su app («exportar TCX» o «GPX») y súbela aquí: tu entrenador lee la distancia, el tiempo y el pulso. Máximo 3 MB.</div>
-    <label class="lb" for="actday">¿Qué día fue?</label><select id="actday"></select>
-    <div style="height:8px"></div>
-    <input id="actfile" type="file" accept=".tcx,.gpx">
-    <div style="height:10px"></div>
-    <button id="bact">Enviar actividad</button><div class="msg" id="mact"></div>
-  </details>
-  <div class="card" id="logros" hidden>
-    <h2>🏅 Mi constancia</h2>
-    <div id="logrosbody"></div>
-    <div style="height:10px"></div>
-    <button id="bexp">Descargar mi resumen</button>
-  </div>
-  <details class="card">
-    <summary>💬 Mensaje a tu entrenador <span class="muted small">(opcional)</span></summary>
-    <div class="muted small" style="margin-bottom:10px">Algo breve («hoy no puedo», «me molesta la rodilla»). No es un chat: lo lee cuando abre su panel.</div>
-    <textarea id="msgtxt" rows="2" maxlength="500" placeholder="Escribe tu mensaje"></textarea>
-    <div style="height:10px"></div>
-    <button id="bmsg">Enviar mensaje</button><div class="msg" id="mmsg"></div>
-  </details>
+<div class="card" id="aviso18" hidden></div>
+<div class="card" id="pend" hidden></div>
+<details class="card" id="week" hidden open><summary>Mi semana</summary><div id="weekbody"></div><div class="msg" id="mm"></div></details>
+<div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div>
+<div class="rest" id="rest" hidden><span class="muted small">⏱ Descanso entre series</span><button data-s="60">1:00</button><button data-s="90">1:30</button><button data-s="120">2:00</button><button data-s="180">3:00</button><span id="restv"></span></div></div>
+<div class="card" id="restday" hidden></div>
+<details class="card" id="wcard" open>
+<summary>¿Cómo estás hoy?</summary>
+<div id="sliders"></div>
+<div style="margin-bottom:14px"><label class="lb" for="wkg">Peso en ayunas (kg) · una vez por semana; si hoy no te pesas, déjalo vacío</label>
+<input id="wkg" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 80,5"></div>
+<textarea id="wnote" rows="2" maxlength="500" placeholder="Algo que quieras contar (opcional)"></textarea>
+<div style="height:10px"></div>
+<button id="bw">Guardar cómo estoy</button><div class="msg" id="mw"></div>
+</details>
+<details class="card" id="ccard" open>
+<summary>Cerrar la sesión</summary>
+<div id="pick" class="row" hidden><label class="lb" for="selses">¿Qué sesión cierras?</label><select id="selses"></select></div>
+<div id="cdayrow" class="row" hidden><label class="lb" for="cday">¿Qué día la hiciste?</label><select id="cday"></select></div>
+<div id="strength" hidden></div>
+<div id="cardio" hidden>
+<h3>Datos del cardio <span class="muted small">(del resumen del reloj)</span></h3>
+<div class="three">
+<div><label class="lb">Distancia (km)</label><input id="dist" type="text" inputmode="decimal" autocomplete="off"></div>
+<div><label class="lb">FC media</label><input id="hravg" type="number" inputmode="numeric" min="30" max="230"></div>
+<div><label class="lb">FC pico</label><input id="hrmax" type="number" inputmode="numeric" min="30" max="230"></div>
 </div>
-<script>
-// La clave "publishable" es publica por diseno: solo puede llamar a funciones que exigen tu token personal.
-const URL_ = "https://tyzqndbyjgpnvikzktcq.supabase.co";
-const KEY = "sb_publishable_hu3kjIQ4f2WCvcgLenHj4Q_N2RDW5IU";
-const ITEMS = [["sleep","Sueño","muy malo","muy bueno"],["fatigue","Energía","agotado","fresco"],["stress","Estrés","muy alto","muy bajo"],["pain","Dolor / molestias","mucho","ninguno"],["mood","Ánimo","muy bajo","muy alto"]];
-const q = new URLSearchParams(location.hash.slice(1));
-// Enlaces: #guillermo-<codigo> (el nombre es solo estetico; el codigo es lo que identifica) o el antiguo #t=<codigo>.
-const H = location.hash.slice(1);
-const TOKEN = (q.get("t") || (H.includes("-") ? H.split("-").pop() : H)).replace(/[^a-zA-Z0-9]/g, "");
-const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
-const DAY = today();
-const $ = id => document.getElementById(id);
-// Decimales: se admite coma o punto (76,7 o 76.7).
-const num = v => parseFloat(String(v ?? "").trim().replace(",", "."));
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-async function rpc(fn, args) {
-  const r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, { method: "POST", headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" }, body: JSON.stringify(args) });
-  if (!r.ok) throw new Error("red");
-  return r.json();
-}
-// ---- Cola sin conexion: si el envio falla por falta de red, se guarda en este movil y se reenvia solo al volver la conexion (con la pagina abierta).
-const QK = `mw_queue_${TOKEN}`;
-const loadQ = () => { try { return JSON.parse(localStorage.getItem(QK) || "[]"); } catch (e) { return []; } };
-const saveQ = q => { try { q.length ? localStorage.setItem(QK, JSON.stringify(q)) : localStorage.removeItem(QK); } catch (e) { /* sin almacenamiento: no hay cola */ } };
-async function enviar(fn, args, clave) {
-  try { return await rpc(fn, args); }
-  catch (e) {
-    const q = loadQ().filter(x => x.k !== clave); q.push({ k: clave, fn, args, day: DAY });
-    saveQ(q.slice(-20));
-    refrescarCola();
-    return { ok: true, queued: true };
-  }
-}
-let FLUSHING = false;
-async function vaciarCola() {
-  if (FLUSHING) return; FLUSHING = true;
-  try {
-    let q = loadQ(), enviados = 0;
-    while (q.length) {
-      try { await rpc(q[0].fn, q[0].args); enviados++; } catch (e) { break; }   // sigue sin red: se reintenta luego
-      q = q.slice(1); saveQ(q);
-    }
-    refrescarCola();
-    if (enviados) { $("offlinetag").textContent = "✔ Se enviaron " + enviados + " cosa" + (enviados > 1 ? "s" : "") + " que estaban pendientes."; $("offlinetag").hidden = false; setTimeout(refrescarCola, 6000); }
-  } finally { FLUSHING = false; }
-}
-function refrescarCola() {
-  const n = loadQ().length, t = $("offlinetag");
-  if (n) { t.textContent = "📡 " + n + " envío" + (n > 1 ? "s" : "") + " guardado" + (n > 1 ? "s" : "") + " en este móvil: se mandará solo al volver la conexión (deja esta página abierta)."; t.hidden = false; }
-  else t.hidden = navigator.onLine !== false;
-  if (!n && navigator.onLine === false) { t.textContent = "📡 Sin conexión. Lo que escribas se guarda en este móvil y se envía al volver."; t.hidden = false; }
-}
-window.addEventListener("online", vaciarCola);
-window.addEventListener("offline", refrescarCola);
-const vals = {};
-ITEMS.forEach(([k, name, lo, hi]) => {
-  vals[k] = 4;
-  const d = document.createElement("div"); d.className = "row";
-  d.innerHTML = `<label>${name}<span class="v" id="v_${k}">4</span></label><input type="range" min="1" max="7" value="4" id="s_${k}"><div class="hint"><span>${lo}</span><span>${hi}</span></div>`;
-  $("sliders").appendChild(d);
-  d.querySelector("input").addEventListener("input", e => { vals[k] = +e.target.value; $("v_" + k).textContent = e.target.value; });
-});
-function say(id, text, ok) { const e = $(id); e.textContent = text; e.className = "msg " + (ok ? "ok" : "bad"); }
-
-// ---- Borrador en el movil: lo que escribes se guarda solo (en este telefono) y se recupera si pierdes cobertura o cierras la pagina.
-const DK = `mw_draft_${TOKEN}_${DAY}`;
-const loadD = () => { try { return JSON.parse(localStorage.getItem(DK) || "{}"); } catch (e) { return {}; } };
-const saveD = d => { try { Object.keys(d).length ? localStorage.setItem(DK, JSON.stringify(d)) : localStorage.removeItem(DK); } catch (e) { /* sin almacenamiento: se sigue sin borrador */ } };
-function fieldKey(el) {
-  if (el.type === "file" || el.id === "selses") return null;
-  if (/^s_/.test(el.id) || el.id === "wkg" || el.id === "wnote") return "w|" + el.id;
-  const s = current(), t = s ? s.title : "";
-  if (el.dataset && el.dataset.ex !== undefined) return `c|${t}|r${el.dataset.ex}_${el.dataset.set}`;
-  return el.id ? `c|${t}|${el.id}` : null;
-}
-function guardarBorrador(e) {
-  const k = fieldKey(e.target); if (!k) return;
-  const d = loadD(); d[k] = e.target.type === "checkbox" ? e.target.checked : e.target.value; saveD(d);
-}
-function borrarBorrador(prefix) { const d = loadD(); Object.keys(d).forEach(k => { if (k.startsWith(prefix)) delete d[k]; }); saveD(d); }
-function restaurarBorrador(prefix) {
-  const d = loadD(); let n = 0;
-  Object.keys(d).filter(k => k.startsWith(prefix)).forEach(k => {
-    const id = k.split("|").pop(), m = /^r(\d+)_(\d+)$/.exec(id);
-    const el = m ? document.querySelector(`input[data-ex="${m[1]}"][data-set="${m[2]}"]`) : $(id);
-    if (!el) return;
-    if (el.type === "checkbox") el.checked = !!d[k]; else el.value = d[k];
-    const sl = /^s_(\w+)$/.exec(id); if (sl) { vals[sl[1]] = +d[k]; $("v_" + sl[1]).textContent = d[k]; }
-    n++;
-  });
-  return n;
-}
-$("app").addEventListener("input", guardarBorrador);
-$("app").addEventListener("change", guardarBorrador);
-
-let SESSIONS = [], PENDING = [], CLOSINGS = [], WEEK = [], MOVED = false, PREV = null;
-const DOW = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-const fmtDay = iso => { const d = new Date(iso + "T12:00:00"); return DOW[d.getDay()] + " " + d.getDate() + "/" + String(d.getMonth() + 1).padStart(2, "0"); };
-// Resumen de la semana y «cambiar mi dia»: la nube solo ofrece los dias que el entrenador (su revisor de semana) deja libres de choques.
-function showWeek() {
-  $("week").hidden = !WEEK.length;
-  if (!WEEK.length) return;
-  const hechas = WEEK.filter(w => w.done).length, pct = Math.round(100 * hechas / WEEK.length);
-  const libre = w => !w.done && !MOVED && w.day >= DAY && (w.moves || []).some(m => m >= DAY);
-  $("weekbody").innerHTML = `<div><b>${hechas}</b> de ${WEEK.length} sesiones cerradas</div><div class="bar"><i style="width:${pct}%"></i></div>`
-    + WEEK.map((w, i) => `<div class="wk${w.day === DAY ? " hoy" : ""}" data-i="${i}"><div class="t">${w.done ? "✓ " : ""}${esc(w.title)}</div><div class="d">${fmtDay(w.day)}${w.day === DAY ? " · hoy" : ""}</div>${libre(w) ? `<button class="chg" data-i="${i}">Cambiar de día</button>` : ""}</div>`).join("")
-    + (MOVED ? `<div class="muted small" style="margin-top:8px">Ya usaste tu cambio de día de esta semana.</div>` : "")
-    + (PREV && PREV.total > 0 ? `<div class="muted small" style="margin-top:8px">Semana pasada: ${PREV.done} de ${PREV.total} sesiones cerradas${PREV.done === PREV.total ? " 👏" : ""}.</div>` : "");
-  document.querySelectorAll("#weekbody .chg").forEach(b => b.onclick = () => abrirCambio(+b.dataset.i));
-}
-function abrirCambio(i) {
-  const w = WEEK[i], row = document.querySelector(`#weekbody .wk[data-i="${i}"]`);
-  document.querySelectorAll("#weekbody .mv").forEach(x => x.remove());
-  const opts = (w.moves || []).filter(m => m >= DAY).map(m => `<option value="${m}">${fmtDay(m)}</option>`).join("");
-  row.insertAdjacentHTML("afterend", `<div class="mv"><label class="lb">¿A qué día la pasas? Solo se puede una vez por semana y dentro de esta semana; tu entrenador lo verá.</label><select id="mvday">${opts}</select><div style="height:8px"></div><button id="mvgo">Confirmar el cambio</button></div>`);
-  $("mvgo").onclick = async () => {
-    $("mvgo").disabled = true;
-    try {
-      const r = await rpc("submit_move", { p_token: TOKEN, p_title: w.title, p_from: w.day, p_to: $("mvday").value });
-      if (r.ok) { say("mm", "Cambiado. Tu entrenador ya lo sabe.", true); await load(); } else { say("mm", r.error || "No se pudo cambiar", false); $("mvgo").disabled = false; }
-    } catch (e) { say("mm", "Sin conexión. Inténtalo de nuevo.", false); $("mvgo").disabled = false; }
-  };
-}
-function showSessions() {
-  $("sessions").hidden = !SESSIONS.length;
-  $("rest").hidden = !SESSIONS.some(x => (x.body || {}).kind !== "cardio" && ((x.body || {}).ex || []).length);
-  if (!SESSIONS.length) return;
-  $("sesbody").innerHTML = SESSIONS.map(s => {
-    const b = s.body || {};
-    return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}<ul>${(b.items || []).map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`;
-  }).join("");
-}
-// ---- Temporizador de descanso: cuenta con la hora real (aguanta que el movil apague la pantalla), vibra y suena al terminar.
-let REST_END = 0, REST_T = null;
-function pitido() { try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(); o.frequency.value = 880; o.connect(a.destination); o.start(); setTimeout(() => { o.stop(); a.close(); }, 350); } catch (e) { /* sin audio */ } }
-function tickRest() {
-  const left = Math.ceil((REST_END - Date.now()) / 1000), v = $("restv");
-  if (left > 0) { v.className = ""; v.textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0"); return; }
-  clearInterval(REST_T); REST_T = null; v.className = "fin"; v.textContent = "¡Listo!";
-  try { navigator.vibrate && navigator.vibrate([300, 100, 300]); } catch (e) { /* sin vibracion */ }
-  pitido();
-}
-document.querySelectorAll("#rest button").forEach(b => b.onclick = () => { REST_END = Date.now() + (+b.dataset.s) * 1000; clearInterval(REST_T); REST_T = setInterval(tickRest, 250); tickRest(); });
-// ---- Lo que falta hoy (cómo estás / cierre de cada sesion) y, en dia de descanso, la proxima sesion.
-function showPend(s) {
-  $("wcard").open = !s.wellness;
-  $("ccard").open = SESSIONS.some(x => !closingFor(x.title)) || PENDING.length > 0;
-  const falta = [];
-  if (!s.wellness) falta.push("cómo estás hoy");
-  SESSIONS.forEach(x => { if (!closingFor(x.title)) falta.push("el cierre de «" + x.title + "»"); });
-  PENDING.forEach(x => falta.push("el cierre pendiente de «" + x.title + "» (" + fmtDay(x.day) + ")"));
-  $("pend").hidden = !falta.length;
-  $("pend").innerHTML = falta.length ? `<b>Te falta hoy:</b> ${falta.map(esc).join(" · ")}` : "";
-  const rd = $("restday");
-  rd.hidden = !!SESSIONS.length;
-  if (!SESSIONS.length) rd.innerHTML = `<h2>Hoy toca descanso</h2><div class="muted">${s.next ? `Tu próxima sesión: <b>${esc(s.next.title)}</b> · ${fmtDay(s.next.day)}.` : "Aprovecha para recuperar bien."}</div>`;
-}
-
-// Se puede cerrar la sesion de hoy o una pendiente de esta semana que se hizo otro dia (con sus series), escogiendo el dia real (hoy, ayer o anteayer).
-const closables = () => SESSIONS.concat(PENDING);
-function current() { const L = closables(); return L.length ? L[+$("selses").value || 0] : null; }
-const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
-function closeDay() { const s = current(); return s && s._pend ? $("cday").value : DAY; }
-// ---- Actividad del reloj (.tcx/.gpx): el archivo se envia tal cual (en base64) y el entrenador lo valida y lo lee en su PC.
-function fillActDay() { $("actday").innerHTML = [0, -1, -2].map(n => { const d = addDays(DAY, n); return `<option value="${d}">${n === 0 ? "hoy" : fmtDay(d)}</option>`; }).join(""); }
-async function archivoABase64(file) {
-  const buf = new Uint8Array(await file.arrayBuffer());
-  let s = "";
-  for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
-  return btoa(s);
-}
-$("bact").onclick = async () => {
-  const f = $("actfile").files[0];
-  if (!f) { say("mact", "Elige primero el archivo de tu reloj.", false); return; }
-  if (!/\.(tcx|gpx)$/i.test(f.name)) { say("mact", "Solo se admiten archivos .tcx o .gpx.", false); return; }
-  if (f.size > 2900000) { say("mact", "El archivo pesa más de 3 MB: exporta solo esa actividad.", false); return; }
-  $("bact").disabled = true;
-  try {
-    const r = await rpc("submit_activity", { p_token: TOKEN, p_day: $("actday").value, p_filename: f.name, p_content: await archivoABase64(f), p_note: null });
-    say("mact", r.ok ? "Enviada ✔ Tu entrenador la leerá en cuanto abra su panel." : (r.error || "No se pudo enviar"), r.ok);
-    if (r.ok) { $("actfile").value = ""; confirmar("bact", "✔ Enviada"); }
-  } catch (e) { say("mact", "No se pudo enviar: sin conexión o el servicio aún no está disponible. Inténtalo de nuevo más tarde.", false); }
-  $("bact").disabled = false;
-};
-function fillCday() {
-  const s = current(), row = $("cdayrow");
-  row.hidden = !(s && s._pend);
-  if (row.hidden) return;
-  const opts = [0, -1, -2].map(n => addDays(DAY, n));
-  $("cday").innerHTML = opts.map(d => `<option value="${d}">${d === DAY ? "hoy" : fmtDay(d)}</option>`).join("");
-  $("cday").value = opts.includes(s.day) ? s.day : addDays(DAY, -2);
-}
-function closingFor(title) { return CLOSINGS.find(c => c.label === title) || null; }
-
-// Solo se piden series de los ejercicios cuyo peso o repeticiones NO estan fijados (a tantear, estimado o rango).
-function buildClosingForm() {
-  const s = current(), b = (s && s.body) || {};
-  const prev = (s && closingFor(s.title)) || {};
-  const pd = prev.data || {};
-  const need = (b.ex || []).filter(e => e.need);
-  const box = $("strength");
-  if ((b.ex || []).length) {
-    box.hidden = false;
-    if (!need.length) {
-      box.innerHTML = `<div class="muted small" style="margin-bottom:14px">Todo está fijado en esta sesión: no hace falta anotar series. Si cambiaste algo, escríbelo en la nota.</div>`;
-    } else {
-      box.innerHTML = `<h3>Series de hoy</h3><div class="muted small" style="margin-bottom:8px">Anota solo lo que hiciste distinto de lo pautado o lo que no tenía peso fijado. Lo que dejes en blanco lo damos por hecho como estaba pautado.</div>` + need.map((e, i) => {
-        const old = (pd.sets || []).find(x => x.ex === e.name) || {};
-        const kgv = old.kg ?? (e.kg || "");
-        const reps = [...Array(e.sets)].map((_, j) => `<input type="number" inputmode="numeric" min="1" max="100" placeholder="rep ${j + 1}" data-ex="${i}" data-set="${j}" value="${(old.reps || [])[j] ?? ""}">`).join("");
-        const kgTxt = e.kg ? `pautado ${e.kg} kg${e.per_hand ? " por mano" : ""}` : (e.kg === 0 ? "peso corporal" : "peso a tantear");
-        return `<div class="ex"><div class="t">${esc(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min === e.rep_max ? e.rep_min : e.rep_min + "-" + e.rep_max} · ${kgTxt}</div>
-          <div class="two" style="margin-top:6px"><div><label class="lb">Kilos${e.per_hand ? " (por mano)" : ""}${e.kg === 0 ? " (0 = peso corporal)" : ""}</label><input type="text" inputmode="decimal" autocomplete="off" id="kg_${i}" value="${kgv}"></div></div>
-          <label class="lb" style="margin-top:6px">Repeticiones de cada serie</label><div class="sets">${reps}</div></div>`;
-      }).join("") + `<div style="height:14px"></div>`;
-    }
-  } else { box.hidden = true; box.innerHTML = ""; }
-  $("cardio").hidden = !b.cardio;
-  const cd = pd.cardio || {};
-  $("dist").value = cd.distance_km ?? ""; $("hravg").value = cd.hr_avg ?? ""; $("hrmax").value = cd.hr_max ?? "";
-  $("elev").value = cd.elev_gain ?? ""; $("stops").checked = !!cd.stops; $("vamd").value = cd.vam_dist_km ?? "";
-  $("vamrow").hidden = !b.vam_test;
-  $("dur").value = prev.duration_min ?? ""; $("rpe").value = prev.rpe ?? ""; $("cnote").value = prev.note ?? "";
-  say("mc", prev.duration_min ? "Ya enviado hoy. Puedes corregirlo." : "", true);
-  if (!prev.duration_min && restaurarBorrador(`c|${s ? s.title : ""}|`)) say("mc", "Recuperé lo que tenías a medias. Revísalo y envíalo.", true);
-}
-function collectData() {
-  const s = current(), b = (s && s.body) || {};
-  const data = {};
-  const need = (b.ex || []).filter(e => e.need);
-  const sets = [];
-  need.forEach((e, i) => {
-    const reps = [...document.querySelectorAll(`input[data-ex="${i}"]`)].map(x => parseInt(x.value, 10)).filter(n => n >= 1 && n <= 100);
-    if (!reps.length) return;
-    const kg = num($("kg_" + i).value);
-    sets.push({ ex: e.name, kg: kg >= 0 ? kg : null, reps });
-  });
-  if (sets.length) data.sets = sets;
-  // Lo que no se anota se da por hecho como pautado (todo en blanco = sesion como estaba; algunos = solo esos cambiaron).
-  const hechos = new Set(sets.map(x => x.ex));
-  const comoPautado = (b.ex || []).filter(e => !hechos.has(e.name)).map(e => e.name);
-  if (comoPautado.length && (b.ex || []).length) data.as_planned = comoPautado;
-  if (b.cardio) {
-    const c = {}, d = num($("dist").value), a = parseInt($("hravg").value, 10), m = parseInt($("hrmax").value, 10);
-    if (d > 0) c.distance_km = d; if (a >= 30) c.hr_avg = a; if (m >= 30) c.hr_max = m;
-    const el = num($("elev").value), vd = num($("vamd").value);
-    if (el >= 0) c.elev_gain = el; if ($("stops").checked) c.stops = true; if (b.vam_test && vd > 0) c.vam_dist_km = vd;
-    if (Object.keys(c).length) data.cardio = c;
-  }
-  return Object.keys(data).length ? data : null;
-}
-async function load() {
-  $("day").textContent = new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
-  if (!TOKEN) { $("err").hidden = false; return; }
-  try {
-    const s = await rpc("app_state", { p_token: TOKEN, p_day: DAY });
-    if (!s.ok) { $("err").hidden = false; return; }
-    $("hi").textContent = "Hola, " + s.label;
-    $("app").hidden = false;
-    SESSIONS = s.sessions || []; PENDING = (s.pending || []).map(x => ({ ...x, _pend: true })); CLOSINGS = s.closings || []; WEEK = s.week || []; MOVED = !!s.moved; PREV = s.prev || null;
-    if (s.wellness) {
-      ITEMS.forEach(([k]) => { vals[k] = s.wellness[k]; $("s_" + k).value = s.wellness[k]; $("v_" + k).textContent = s.wellness[k]; });
-      if (s.wellness.note) $("wnote").value = s.wellness.note;
-      if (s.wellness.weight_kg) $("wkg").value = s.wellness.weight_kg;
-      say("mw", "Ya enviado hoy. Puedes corregirlo.", true);
-    } else if (restaurarBorrador("w|")) say("mw", "Recuperé lo que tenías a medias. Revísalo y guárdalo.", true);
-    showWeek();
-    showSessions();
-    showPend(s);
-    recordatorio(s);
-    if (closables().length > 1) {
-      $("pick").hidden = false;
-      $("selses").innerHTML = closables().map((x, i) => `<option value="${i}">${esc(x.title)}${x._pend ? " (pendiente del " + fmtDay(x.day) + ")" : ""}</option>`).join("");
-      $("selses").onchange = () => { fillCday(); buildClosingForm(); };
-    }
-    fillCday();
-    fillActDay();
-    buildClosingForm();
-    cargarLogros();
-    vaciarCola();
-    refrescarCola();
-  } catch (e) { $("err").textContent = "Sin conexión. Inténtalo de nuevo."; $("err").hidden = false; }
-}
-// ---- Constancia real (historial de la nube). Si la funcion no existe todavia, la tarjeta simplemente no aparece.
-function confirmar(id, txt) {
-  const b = $(id), old = b.textContent;
-  b.textContent = txt; b.classList.add("sent");
-  setTimeout(() => { b.textContent = old; b.classList.remove("sent"); }, 2500);
-}
-// Recordatorio por la tarde: solo si hoy hay algo pendiente (no avisa en dias de descanso ni si ya esta todo enviado).
-function recordatorio(s) {
-  const falta = (!s.wellness ? 1 : 0) + SESSIONS.filter(x => !closingFor(x.title)).length, a = $("aviso18");
-  const h = new Date().getHours();
-  a.hidden = !(falta && h >= 18);
-  if (!a.hidden) a.innerHTML = "⏰ Ya es de tarde y aún no has enviado todo lo de hoy. Son 2 minutos: cuéntanos cómo estás y cierra la sesión.";
-}
-let HIST = null;
-async function cargarLogros() {
-  try {
-    const h = await rpc("app_history", { p_token: TOKEN, p_day: DAY });
-    if (!h || !h.ok) return;
-    HIST = h;
-    const weeks = h.weeks || [], wk0 = weeks.length ? weeks[weeks.length - 1].week : null;
-    const mondayNow = (() => { const d = new Date(DAY + "T12:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); })();
-    // Semanas completas seguidas: se cuentan hacia atras las semanas ya terminadas con todas sus sesiones cerradas (la actual no rompe la racha).
-    let racha = 0;
-    for (let i = weeks.length - 1; i >= 0; i--) {
-      const w = weeks[i];
-      if (w.week === mondayNow) { if (w.total && w.done === w.total) racha++; continue; }
-      if (w.total && w.done === w.total) racha++; else break;
-    }
-    const cur = weeks.find(w => w.week === mondayNow);
-    const lines = [];
-    lines.push(`<div><b>${h.total_done || 0}</b> ${(h.total_done || 0) === 1 ? "sesión" : "sesiones"} ${(h.total_done || 0) === 1 ? "cerrada" : "cerradas"} en total</div>`);
-    if (racha) lines.push(`<div><b>${racha}</b> semana${racha > 1 ? "s" : ""} completa${racha > 1 ? "s" : ""} seguida${racha > 1 ? "s" : ""}</div>`);
-    if (cur) lines.push(`<div>Esta semana: <b>${cur.done}</b> de ${cur.total}${cur.total && cur.done === cur.total ? " ✅ semana perfecta" : ""}</div>`);
-    if (!(h.total_done || 0) && !racha) lines.push(`<div class="muted small">Aquí irá sumando lo que vayas cerrando.</div>`);
-    $("logrosbody").innerHTML = lines.join("");
-    $("logros").hidden = false;
-  } catch (e) { /* sin historial: la tarjeta no se muestra */ }
-}
-$("bexp").onclick = () => {
-  if (!HIST) return;
-  const L = ["MI RESUMEN · " + ($("hi").textContent.replace("Hola, ", "")), "Generado el " + DAY, "", "Sesiones cerradas en total: " + (HIST.total_done || 0), "", "Últimas semanas (hechas / pautadas):"];
-  (HIST.weeks || []).slice().reverse().forEach(w => L.push(` ${w.week}: ${w.done} / ${w.total}`));
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([L.join("\n")], { type: "text/plain;charset=utf-8" }));
-  a.download = "mi-resumen-" + DAY + ".txt";
-  document.body.appendChild(a); a.click(); a.remove();
-};
-$("bmsg").onclick = async () => {
-  const t = $("msgtxt").value.trim();
-  if (!t) { say("mmsg", "Escribe algo primero.", false); return; }
-  $("bmsg").disabled = true;
-  try {
-    const r = await enviar("submit_message", { p_token: TOKEN, p_message: t }, "m|" + Date.now());
-    say("mmsg", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Enviado ✔ Tu entrenador lo leerá en cuanto abra su panel.") : (r.error || "No se pudo enviar"), r.ok);
-    if (r.ok) { $("msgtxt").value = ""; if (!r.queued) confirmar("bmsg", "✔ Enviado"); }
-  } catch (e) { say("mmsg", "No se pudo enviar: sin conexión o el servicio aún no está disponible. Tu texto sigue aquí; inténtalo de nuevo más tarde.", false); }
-  $("bmsg").disabled = false;
-};
-$("bw").onclick = async () => {
-  if (ITEMS.some(([k]) => !(vals[k] >= 1 && vals[k] <= 7))) { say("mw", "Revisa los deslizadores: cada uno va de 1 a 7.", false); return; }
-  $("bw").disabled = true;
-  const kg = num($("wkg").value);
-  if ($("wkg").value && !(kg >= 30 && kg <= 250)) { say("mw", "El peso debe estar entre 30 y 250 kg.", false); $("bw").disabled = false; return; }
-  try {
-    const r = await enviar("submit_wellness", { p_token: TOKEN, p_day: DAY, p_sleep: vals.sleep, p_fatigue: vals.fatigue, p_stress: vals.stress, p_pain: vals.pain, p_mood: vals.mood, p_note: $("wnote").value || null, p_weight: kg >= 30 && kg <= 250 ? kg : null }, "w|" + DAY);
-    say("mw", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Guardado. Gracias.") : (r.error || "No se pudo guardar"), r.ok);
-    if (r.ok) { borrarBorrador("w|"); if (!r.queued) confirmar("bw", "✔ Enviado"); }
-  } catch (e) { say("mw", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
-  $("bw").disabled = false;
-};
-$("bc").onclick = async () => {
-  const dur = parseInt($("dur").value, 10), rpe = num($("rpe").value);
-  if (!(dur >= 1 && dur <= 600) || !(rpe >= 1 && rpe <= 10)) { say("mc", "Pon la duración (1-600 min) y el esfuerzo (1-10).", false); return; }
-  $("bc").disabled = true;
-  try {
-    const s = current();
-    const r = await enviar("submit_closing", { p_token: TOKEN, p_day: closeDay(), p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() }, "c|" + closeDay() + "|" + (s ? s.title : ""));
-    say("mc", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Enviado. Gracias.") : (r.error || "No se pudo enviar"), r.ok);
-    if (r.ok) { borrarBorrador(`c|${s ? s.title : ""}|`); if (!r.queued) confirmar("bc", "✔ Enviado"); }
-  } catch (e) { say("mc", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
-  $("bc").disabled = false;
-};
-// ---- Capturas opcionales: se reducen en el movil (lado mayor 1600 px, JPEG) para que pesen poco antes de subirlas.
-let CAPS = [];
-function reducir(file) {
-  return new Promise((ok, ko) => {
-    const url = URL.createObjectURL(file), img = new Image();
-    img.onload = () => {
-      const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
-      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      const d = c.toDataURL("image/jpeg", 0.72);
-      ok({ b64: d.split(",")[1], thumb: d });
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); ko(new Error("img")); };
-    img.src = url;
-  });
-}
-$("capfile").onchange = async e => {
-  CAPS = []; $("capprev").innerHTML = ""; say("mcap", "", true);
-  const files = [...e.target.files].slice(0, 3);
-  for (const f of files) {
-    try { const r = await reducir(f); CAPS.push(r); $("capprev").insertAdjacentHTML("beforeend", `<img src="${r.thumb}" style="height:70px;border-radius:8px;border:1px solid var(--bd)">`); }
-    catch (x) { say("mcap", "No he podido leer una de las imágenes. Prueba con otra captura.", false); }
-  }
-  $("bcap").disabled = !CAPS.length;
-};
-$("bcap").onclick = async () => {
-  $("bcap").disabled = true; let n = 0, err = "";
-  const s = current();
-  for (const c of CAPS) {
-    try {
-      const r = await rpc("submit_capture", { p_token: TOKEN, p_day: DAY, p_label: s ? s.title : "", p_mime: "image/jpeg", p_image: c.b64, p_note: null });
-      if (r.ok) n++; else err = r.error || "no se pudo enviar";
-    } catch (e) { err = "sin conexión"; }
-  }
-  if (n) { say("mcap", `Enviada${n > 1 ? "s" : ""} ${n} captura${n > 1 ? "s" : ""}. Gracias: la leemos y apuntamos las series.`, true); CAPS = []; $("capprev").innerHTML = ""; $("capfile").value = ""; }
-  else { say("mcap", err ? "No se pudo enviar: " + err : "Nada que enviar.", false); $("bcap").disabled = !CAPS.length; }
-};
-load();
-</script>
+<div class="two" style="margin-top:10px">
+<div><label class="lb">Desnivel acumulado (m)</label><input id="elev" type="number" inputmode="numeric" min="0" max="5000" placeholder="Opcional"></div>
+<div style="display:flex;align-items:end"><label class="lb" style="display:flex;gap:8px;align-items:center;margin:0 0 10px"><input id="stops" type="checkbox" style="width:auto"> Hice paradas</label></div>
+</div>
+<div id="vamrow" hidden style="margin-top:10px"><label class="lb">Test de 6 minutos: kilómetros recorridos SOLO en esos 6 min</label><input id="vamd" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 1.25"></div>
+<div style="height:14px"></div>
+</div>
+<div class="two">
+<div><label class="lb">Duración (min)</label><input id="dur" type="number" inputmode="numeric" min="1" max="600"></div>
+<div><label class="lb">Esfuerzo global (1-10)</label><input id="rpe" type="text" inputmode="decimal" autocomplete="off"></div>
+</div>
+<div style="height:10px"></div>
+<textarea id="cnote" rows="2" maxlength="500" placeholder="Molestias o cambios sobre lo pautado (opcional)"></textarea>
+<div style="height:10px"></div>
+<button id="bc">Enviar cierre</button><div class="msg" id="mc"></div>
+</details>
+<details class="card">
+<summary>📷 Mandar una captura <span class="muted small">(opcional)</span></summary>
+<div class="muted small" style="margin-bottom:10px">Una foto de tus ejercicios de hoy (libreta, app del gimnasio, reloj). Apuntamos las series por ti. Hasta 3 a la vez.</div>
+<input id="capfile" type="file" accept="image/*" multiple>
+<div id="capprev" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
+<button id="bcap" disabled>Enviar captura</button><div class="msg" id="mcap"></div>
+</details>
+<details class="card">
+<summary>⌚ Subir la actividad de mi reloj <span class="muted small">(opcional)</span></summary>
+<div class="muted small" style="margin-bottom:10px">Si corriste o caminaste con reloj, exporta la actividad desde su app («exportar TCX» o «GPX») y súbela aquí: tu entrenador lee la distancia, el tiempo y el pulso. Máximo 3 MB.</div>
+<label class="lb" for="actday">¿Qué día fue?</label><select id="actday"></select>
+<div style="height:8px"></div>
+<input id="actfile" type="file" accept=".tcx,.gpx">
+<div style="height:10px"></div>
+<button id="bact">Enviar actividad</button><div class="msg" id="mact"></div>
+</details>
+<div class="card" id="logros" hidden>
+<h2>🏅 Mi constancia</h2>
+<div id="logrosbody"></div>
+<div style="height:10px"></div>
+<button id="bexp">Descargar mi resumen</button>
+</div>
+<details class="card">
+<summary>💬 Mensaje a tu entrenador <span class="muted small">(opcional)</span></summary>
+<div class="muted small" style="margin-bottom:10px">Algo breve («hoy no puedo», «me molesta la rodilla»). No es un chat: lo lee cuando abre su panel.</div>
+<textarea id="msgtxt" rows="2" maxlength="500" placeholder="Escribe tu mensaje"></textarea>
+<div style="height:10px"></div>
+<button id="bmsg">Enviar mensaje</button><div class="msg" id="mmsg"></div>
+</details>
+</div>
+<script>const e="sb_publishable_hu3kjIQ4f2WCvcgLenHj4Q_N2RDW5IU",t=[["sleep","Sueño","muy malo","muy bueno"],["fatigue","Energía","agotado","fresco"],["stress","Estrés","muy alto","muy bajo"],["pain","Dolor / molestias","mucho","ninguno"],["mood","Ánimo","muy bajo","muy alto"]],a=new URLSearchParams(location.hash.slice(1)),n=location.hash.slice(1),o=(a.get("t")||(n.includes("-")?n.split("-").pop():n)).replace(/[^a-zA-Z0-9]/g,""),s=(()=>{const e=new Date;return e.setMinutes(e.getMinutes()-e.getTimezoneOffset()),e.toISOString().slice(0,10)})(),i=e=>document.getElementById(e),r=e=>parseFloat(String(e??"").trim().replace(",",".")),l=e=>String(e).replace(/[&<>"]/g,(e=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[e]))),d="1"===new URLSearchParams(location.search).get("ver"),c=new Set(["app_state","app_history"]);async function u(t,a){if(d&&!c.has(t))throw new Error("solo lectura");const n=await fetch(`https://tyzqndbyjgpnvikzktcq.supabase.co/rest/v1/rpc/${t}`,{method:"POST",headers:{apikey:e,Authorization:`Bearer ${e}`,"Content-Type":"application/json"},body:JSON.stringify(a)});if(!n.ok)throw new Error("red");return n.json()}const m=`mw_queue_${o}`,p=()=>{if(d)return[];try{return JSON.parse(localStorage.getItem(m)||"[]")}catch(e){return[]}},v=e=>{if(!d)try{e.length?localStorage.setItem(m,JSON.stringify(e)):localStorage.removeItem(m)}catch(e){}};async function h(e,t,a){if(d)return{ok:!1,error:"Modo solo lectura: no se envía nada"};try{return await u(e,t)}catch(n){const o=p().filter((e=>e.k!==a));return o.push({k:a,fn:e,args:t,day:s}),v(o.slice(-20)),y(),{ok:!0,queued:!0}}}let g=!1;async function b(){if(!d&&!g){g=!0;try{let e=p(),t=0;for(;e.length;){try{await u(e[0].fn,e[0].args),t++}catch(e){break}e=e.slice(1),v(e)}y(),t&&(i("offlinetag").textContent="✔ Se enviaron "+t+" cosa"+(t>1?"s":"")+" que estaban pendientes.",i("offlinetag").hidden=!1,setTimeout(y,6e3))}finally{g=!1}}}function y(){if(d)return;const e=p().length,t=i("offlinetag");e?(t.textContent="📡 "+e+" envío"+(e>1?"s":"")+" guardado"+(e>1?"s":"")+" en este móvil: se mandará solo al volver la conexión (deja esta página abierta).",t.hidden=!1):t.hidden=!1!==navigator.onLine,e||!1!==navigator.onLine||(t.textContent="📡 Sin conexión. Lo que escribas se guarda en este móvil y se envía al volver.",t.hidden=!1)}window.addEventListener("online",b),window.addEventListener("offline",y);const f={};t.forEach((([e,t,a,n])=>{f[e]=4;const o=document.createElement("div");o.className="row",o.innerHTML=`<label>${t}<span class="v" id="v_${e}">4</span></label><input type="range" min="1" max="7" value="4" id="s_${e}"><div class="hint"><span>${a}</span><span>${n}</span></div>`,i("sliders").appendChild(o),o.querySelector("input").addEventListener("input",(t=>{f[e]=+t.target.value,i("v_"+e).textContent=t.target.value}))}));const $=["bw","bc","bcap","bact","bmsg","mvgo"];function w(e){const t=i("verbanner");t&&(t.textContent="Estás viendo la app de "+(e||"un cliente")+" en modo solo lectura: no se envía nada",t.hidden=!1,document.body.classList.add("ver"))}function _(){d&&($.forEach((e=>{const t=i(e);t&&(void 0===t.dataset.orig&&(t.dataset.orig=t.textContent),t.disabled=!0,t.textContent=t.dataset.orig+" (desactivado: solo lectura)")})),document.querySelectorAll("#weekbody .chg, .rp button").forEach((e=>{e.disabled=!0,e.title="Desactivado: modo solo lectura"})),document.querySelectorAll("#app input, #app textarea, #app select").forEach((e=>{"selses"!==e.id&&(e.disabled=!0)})))}function x(e,t,a){const n=i(e);n.textContent=t,n.className="msg "+(a?"ok":"bad")}d&&w("");const k=`mw_draft_${o}_${s}`,S=()=>{if(d)return{};try{return JSON.parse(localStorage.getItem(k)||"{}")}catch(e){return{}}},E=e=>{if(!d)try{Object.keys(e).length?localStorage.setItem(k,JSON.stringify(e)):localStorage.removeItem(k)}catch(e){}};function j(e){if(d)return;const t=function(e){if("file"===e.type||"selses"===e.id)return null;if(/^s_/.test(e.id)||"wkg"===e.id||"wnote"===e.id)return"w|"+e.id;const t=P(),a=t?t.title:"";return e.dataset&&void 0!==e.dataset.ex?`c|${a}|r${e.dataset.ex}_${e.dataset.set}`:e.id?`c|${a}|${e.id}`:null}(e.target);if(!t)return;const a=S();a[t]="checkbox"===e.target.type?e.target.checked:e.target.value,E(a)}function q(e){const t=S();Object.keys(t).forEach((a=>{a.startsWith(e)&&delete t[a]})),E(t)}function L(e){if(d)return 0;const t=S();let a=0;return Object.keys(t).filter((t=>t.startsWith(e))).forEach((e=>{const n=e.split("|").pop(),o=/^r(\d+)_(\d+)$/.exec(n),s=/^rir_(\d+)$/.exec(n);if(s){const n=(((P()||{}).body||{}).ex||[])[+s[1]];return void(n&&["0","1-3","4+"].includes(t[e])&&(Q[n.name]=t[e],document.querySelectorAll(`.rp[data-rp="${s[1]}"] button`).forEach((a=>a.setAttribute("aria-checked",String(a.dataset.v===t[e])))),a++))}const r=o?document.querySelector(`input[data-ex="${o[1]}"][data-set="${o[2]}"]`):i(n);if(!r)return;"checkbox"===r.type?r.checked=!!t[e]:r.value=t[e];const l=/^s_(\w+)$/.exec(n);l&&(f[l[1]]=+t[e],i("v_"+l[1]).textContent=t[e]),a++})),a}i("app").addEventListener("input",j),i("app").addEventListener("change",j);let T=[],M=[],C=[],A=[],I=!1,H=null;const O=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],N=e=>{const t=new Date(e+"T12:00:00");return O[t.getDay()]+" "+t.getDate()+"/"+String(t.getMonth()+1).padStart(2,"0")};let D=0,R=null;function z(){const e=Math.ceil((D-Date.now())/1e3),t=i("restv");if(e>0)return t.className="",void(t.textContent=Math.floor(e/60)+":"+String(e%60).padStart(2,"0"));clearInterval(R),R=null,t.className="fin",t.textContent="¡Listo!";try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}!function(){try{const e=new(window.AudioContext||window.webkitAudioContext),t=e.createOscillator();t.frequency.value=880,t.connect(e.destination),t.start(),setTimeout((()=>{t.stop(),e.close()}),350)}catch(e){}}()}document.querySelectorAll("#rest button").forEach((e=>e.onclick=()=>{D=Date.now()+1e3*+e.dataset.s,clearInterval(R),R=setInterval(z,250),z()}));const U=()=>T.concat(M);function P(){const e=U();return e.length?e[+i("selses").value||0]:null}const B=(e,t)=>{const a=new Date(e+"T12:00:00");return a.setDate(a.getDate()+t),a.toISOString().slice(0,10)};function G(){const e=P();return e&&e._pend?i("cday").value:s}async function J(e){const t=new Uint8Array(await e.arrayBuffer());let a="";for(let e=0;e<t.length;e+=32768)a+=String.fromCharCode.apply(null,t.subarray(e,e+32768));return btoa(a)}function W(){const e=P(),t=i("cdayrow");if(t.hidden=!(e&&e._pend),t.hidden)return;const a=[0,-1,-2].map((e=>B(s,e)));i("cday").innerHTML=a.map((e=>`<option value="${e}">${e===s?"hoy":N(e)}</option>`)).join(""),i("cday").value=a.includes(e.day)?e.day:B(s,-2)}function Y(e){return C.find((t=>t.label===e))||null}i("bact").onclick=async()=>{const e=i("actfile").files[0];if(e)if(/\.(tcx|gpx)$/i.test(e.name))if(e.size>29e5)x("mact","El archivo pesa más de 3 MB: exporta solo esa actividad.",!1);else{i("bact").disabled=!0;try{const t=await u("submit_activity",{p_token:o,p_day:i("actday").value,p_filename:e.name,p_content:await J(e),p_note:null});x("mact",t.ok?"Enviada ✔ Tu entrenador la leerá en cuanto abra su panel.":t.error||"No se pudo enviar",t.ok),t.ok&&(i("actfile").value="",X("bact","✔ Enviada"))}catch(e){x("mact","No se pudo enviar: sin conexión o el servicio aún no está disponible. Inténtalo de nuevo más tarde.",!1)}i("bact").disabled=!1}else x("mact","Solo se admiten archivos .tcx o .gpx.",!1);else x("mact","Elige primero el archivo de tu reloj.",!1)};let Q={};const F=[["0","No podía más"],["1-3","Podía 1-3 más"],["4+","Podía más de 3"]];function K(){const e=P(),t=e&&e.body||{},a=e&&Y(e.title)||{},n=a.data||{},o=(t.ex||[]).filter((e=>e.need)),s=i("strength");var r;Q={},Object.entries(n.rir||{}).forEach((([e,t])=>{["0","1-3","4+"].includes(t)&&(Q[e]=t)})),(t.ex||[]).length?(s.hidden=!1,o.length?s.innerHTML='<h3>Series de hoy</h3><div class="muted small" style="margin-bottom:8px">Anota solo lo que hiciste distinto de lo pautado o lo que no tenía peso fijado. Lo que dejes en blanco lo damos por hecho como estaba pautado.</div>'+o.map(((e,t)=>{const a=(n.sets||[]).find((t=>t.ex===e.name))||{},o=a.kg??(e.kg||""),s=[...Array(e.sets)].map(((e,n)=>`<input type="number" inputmode="numeric" min="1" max="100" placeholder="rep ${n+1}" data-ex="${t}" data-set="${n}" value="${(a.reps||[])[n]??""}">`)).join(""),i=e.kg?`pautado ${e.kg} kg${e.per_hand?" por mano":""}`:0===e.kg?"peso corporal":"peso a tantear";return`<div class="ex"><div class="t">${l(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min===e.rep_max?e.rep_min:e.rep_min+"-"+e.rep_max} · ${i}</div>\n          <div class="two" style="margin-top:6px"><div><label class="lb">Kilos${e.per_hand?" (por mano)":""}${0===e.kg?" (0 = peso corporal)":""}</label><input type="text" inputmode="decimal" autocomplete="off" id="kg_${t}" value="${o}"></div></div>\n          <label class="lb" style="margin-top:6px">Repeticiones de cada serie</label><div class="sets">${s}</div></div>`})).join("")+'<div style="height:14px"></div>':s.innerHTML='<div class="muted small" style="margin-bottom:14px">Todo está fijado en esta sesión: no hace falta anotar series. Si cambiaste algo, escríbelo en la nota.</div>',s.insertAdjacentHTML("beforeend",'<h3>¿Cómo te quedaste en cada ejercicio?</h3><div class="muted small" style="margin-bottom:8px">Opcional. Toca el botón que más se parezca a tu última serie.</div>'+t.ex.map(((e,t)=>`<div class="ex"><div class="t">${l(e.name)}</div><div class="rp" role="radiogroup" aria-label="Repeticiones que te sobraban en ${l(e.name)}" data-rp="${t}">`+F.map((([t,a])=>`<button type="button" role="radio" data-v="${t}" aria-checked="${Q[e.name]===t}">${a}</button>`)).join("")+"</div></div>")).join("")+'<div style="height:14px"></div>'),r=t.ex,document.querySelectorAll(".rp").forEach((e=>e.querySelectorAll("button").forEach((t=>t.onclick=()=>{const a=+e.dataset.rp;!function(e,t,a){const n=document.querySelector(`.rp[data-rp="${e}"]`);if(!n)return;const o=Q[a]===t;o?delete Q[a]:Q[a]=t,n.querySelectorAll("button").forEach((e=>e.setAttribute("aria-checked",String(Q[a]===e.dataset.v))));const s=P(),i=S(),r=`c|${s?s.title:""}|rir_${e}`;o?delete i[r]:i[r]=t,E(i)}(a,t.dataset.v,r[a].name)}))))):(s.hidden=!0,s.innerHTML=""),i("cardio").hidden=!t.cardio;const d=n.cardio||{};i("dist").value=d.distance_km??"",i("hravg").value=d.hr_avg??"",i("hrmax").value=d.hr_max??"",i("elev").value=d.elev_gain??"",i("stops").checked=!!d.stops,i("vamd").value=d.vam_dist_km??"",i("vamrow").hidden=!t.vam_test,i("dur").value=a.duration_min??"",i("rpe").value=a.rpe??"",i("cnote").value=a.note??"",x("mc",a.duration_min?"Ya enviado hoy. Puedes corregirlo.":"",!0),!a.duration_min&&L(`c|${e?e.title:""}|`)&&x("mc","Recuperé lo que tenías a medias. Revísalo y envíalo.",!0),_()}function Z(){const e=P(),t=e&&e.body||{},a={},n=(t.ex||[]).filter((e=>e.need)),o=[];n.forEach(((e,t)=>{const a=[...document.querySelectorAll(`input[data-ex="${t}"]`)].map((e=>parseInt(e.value,10))).filter((e=>e>=1&&e<=100));if(!a.length)return;const n=r(i("kg_"+t).value);o.push({ex:e.name,kg:n>=0?n:null,reps:a})})),o.length&&(a.sets=o);const s={};(t.ex||[]).forEach((e=>{["0","1-3","4+"].includes(Q[e.name])&&(s[e.name]=Q[e.name])})),Object.keys(s).length&&(a.rir=s);const l=new Set(o.map((e=>e.ex))),d=(t.ex||[]).filter((e=>!l.has(e.name))).map((e=>e.name));if(d.length&&(t.ex||[]).length&&(a.as_planned=d),t.cardio){const e={},n=r(i("dist").value),o=parseInt(i("hravg").value,10),s=parseInt(i("hrmax").value,10);n>0&&(e.distance_km=n),o>=30&&(e.hr_avg=o),s>=30&&(e.hr_max=s);const l=r(i("elev").value),d=r(i("vamd").value);l>=0&&(e.elev_gain=l),i("stops").checked&&(e.stops=!0),t.vam_test&&d>0&&(e.vam_dist_km=d),Object.keys(e).length&&(a.cardio=e)}return Object.keys(a).length?a:null}async function V(){if(i("day").textContent=(new Date).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"}),o)try{const e=await u("app_state",{p_token:o,p_day:s});if(!e.ok)return void(i("err").hidden=!1);i("hi").textContent="Hola, "+e.label,d&&w(e.label),i("app").hidden=!1,T=e.sessions||[],M=(e.pending||[]).map((e=>({...e,_pend:!0}))),C=e.closings||[],A=e.week||[],I=!!e.moved,H=e.prev||null,e.wellness?(t.forEach((([t])=>{f[t]=e.wellness[t],i("s_"+t).value=e.wellness[t],i("v_"+t).textContent=e.wellness[t]})),e.wellness.note&&(i("wnote").value=e.wellness.note),e.wellness.weight_kg&&(i("wkg").value=e.wellness.weight_kg),x("mw","Ya enviado hoy. Puedes corregirlo.",!0)):L("w|")&&x("mw","Recuperé lo que tenías a medias. Revísalo y guárdalo.",!0),function(){if(i("week").hidden=!A.length,!A.length)return;const e=A.filter((e=>e.done)).length,t=Math.round(100*e/A.length);i("weekbody").innerHTML=`<div><b>${e}</b> de ${A.length} sesiones cerradas</div><div class="bar"><i style="width:${t}%"></i></div>`+A.map(((e,t)=>`<div class="wk${e.day===s?" hoy":""}" data-i="${t}"><div class="t">${e.done?"✓ ":""}${l(e.title)}</div><div class="d">${N(e.day)}${e.day===s?" · hoy":""}</div>${(e=>!e.done&&!I&&e.day>=s&&(e.moves||[]).some((e=>e>=s)))(e)?`<button class="chg" data-i="${t}">Cambiar de día</button>`:""}</div>`)).join("")+(I?'<div class="muted small" style="margin-top:8px">Ya usaste tu cambio de día de esta semana.</div>':"")+(H&&H.total>0?`<div class="muted small" style="margin-top:8px">Semana pasada: ${H.done} de ${H.total} sesiones cerradas${H.done===H.total?" 👏":""}.</div>`:""),document.querySelectorAll("#weekbody .chg").forEach((e=>e.onclick=()=>function(e){const t=A[e],a=document.querySelector(`#weekbody .wk[data-i="${e}"]`);document.querySelectorAll("#weekbody .mv").forEach((e=>e.remove()));const n=(t.moves||[]).filter((e=>e>=s)).map((e=>`<option value="${e}">${N(e)}</option>`)).join("");a.insertAdjacentHTML("afterend",`<div class="mv"><label class="lb">¿A qué día la pasas? Solo se puede una vez por semana y dentro de esta semana; tu entrenador lo verá.</label><select id="mvday">${n}</select><div style="height:8px"></div><button id="mvgo">Confirmar el cambio</button></div>`),_(),i("mvgo").onclick=async()=>{i("mvgo").disabled=!0;try{const e=await u("submit_move",{p_token:o,p_title:t.title,p_from:t.day,p_to:i("mvday").value});e.ok?(x("mm","Cambiado. Tu entrenador ya lo sabe.",!0),await V()):(x("mm",e.error||"No se pudo cambiar",!1),i("mvgo").disabled=!1)}catch(e){x("mm","Sin conexión. Inténtalo de nuevo.",!1),i("mvgo").disabled=!1}}}(+e.dataset.i))),_()}(),i("sessions").hidden=!T.length,i("rest").hidden=!T.some((e=>"cardio"!==(e.body||{}).kind&&((e.body||{}).ex||[]).length)),T.length&&(i("sesbody").innerHTML=T.map((e=>{const t=e.body||{},a=(t.calentamiento||[]).length?`<details class="det"><summary>Antes de empezar</summary><ul>${t.calentamiento.map((e=>`<li><b>${l(e.k)}:</b> ${l(e.v)}</li>`)).join("")}</ul></details>`:"";let n;return n=(t.ex||[]).length?t.ex.map(((e,t)=>`<div class="ex"><div class="t">${t+1}. ${l(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min===e.rep_max?e.rep_min:e.rep_min+"-"+e.rep_max}${(e=>" · "+l(e.carga||(null==e.kg?"a tantear":e.kg+" kg"+(e.per_hand?" por mano":""))))(e)}${e.descanso?" · descanso "+l(e.descanso):""}</div>`+(e.lesion?`<div class="small bad">⚠️ ${l(e.lesion)}</div>`:"")+(e.nota?`<div class="small">${l(e.nota)}</div>`:"")+"</div>")).join(""):(t.bloques||[]).length?t.bloques.map((e=>`<div class="ex"><div class="t">${l(e.nombre)} · ${e.minutos} min</div><div class="small">${[e.esfuerzo?"esfuerzo "+l(e.esfuerzo)+"/10":"",e.pulso?l(e.pulso):"",e.ritmo?l(e.ritmo):"",e.test_habla?l(e.test_habla):"",e.recuperacion?l(e.recuperacion):""].filter(Boolean).join(" · ")}</div>`+(e.como?`<div class="small muted">${l(e.como)}</div>`:"")+"</div>")).join(""):`<ul>${(t.items||[]).map((e=>`<li>${l(e)}</li>`)).join("")}</ul>`,`<div class="ses"><h3>${l(e.title)}</h3>${t.resumen?`<div class="muted">${l(t.resumen)}</div>`:""}${a}${n}`+(t.nota_entrenador?`<div class="callout">${l(t.nota_entrenador)}</div>`:"")+"</div>"})).join("")),function(e){i("wcard").open=!e.wellness,i("ccard").open=T.some((e=>!Y(e.title)))||M.length>0;const t=[];e.wellness||t.push("cómo estás hoy"),T.forEach((e=>{Y(e.title)||t.push("el cierre de «"+e.title+"»")})),M.forEach((e=>t.push("el cierre pendiente de «"+e.title+"» ("+N(e.day)+")"))),i("pend").hidden=!t.length,i("pend").innerHTML=t.length?`<b>Te falta hoy:</b> ${t.map(l).join(" · ")}`:"";const a=i("restday");a.hidden=!!T.length,T.length||(a.innerHTML=`<h2>Hoy toca descanso</h2><div class="muted">${e.next?`Tu próxima sesión: <b>${l(e.next.title)}</b> · ${N(e.next.day)}.`:"Aprovecha para recuperar bien."}</div>`)}(e),function(e){const t=(e.wellness?0:1)+T.filter((e=>!Y(e.title))).length,a=i("aviso18"),n=(new Date).getHours();a.hidden=d||!(t&&n>=18),a.hidden||(a.innerHTML="⏰ Ya es de tarde y aún no has enviado todo lo de hoy. Son 2 minutos: cuéntanos cómo estás y cierra la sesión.")}(e),U().length>1&&(i("pick").hidden=!1,i("selses").innerHTML=U().map(((e,t)=>`<option value="${t}">${l(e.title)}${e._pend?" (pendiente del "+N(e.day)+")":""}</option>`)).join(""),i("selses").onchange=()=>{W(),K()}),W(),i("actday").innerHTML=[0,-1,-2].map((e=>{const t=B(s,e);return`<option value="${t}">${0===e?"hoy":N(t)}</option>`})).join(""),K(),async function(){try{const e=await u("app_history",{p_token:o,p_day:s});if(!e||!e.ok)return;ee=e;const t=e.weeks||[],a=(t.length&&t[t.length-1].week,(()=>{const e=new Date(s+"T12:00:00");return e.setDate(e.getDate()-(e.getDay()+6)%7),e.toISOString().slice(0,10)})());let n=0;for(let e=t.length-1;e>=0;e--){const o=t[e];if(o.week!==a){if(!o.total||o.done!==o.total)break;n++}else o.total&&o.done===o.total&&n++}const r=t.find((e=>e.week===a)),l=[];l.push(`<div><b>${e.total_done||0}</b> ${1===(e.total_done||0)?"sesión":"sesiones"} ${1===(e.total_done||0)?"cerrada":"cerradas"} en total</div>`),n&&l.push(`<div><b>${n}</b> semana${n>1?"s":""} completa${n>1?"s":""} seguida${n>1?"s":""}</div>`),r&&l.push(`<div>Esta semana: <b>${r.done}</b> de ${r.total}${r.total&&r.done===r.total?" ✅ semana perfecta":""}</div>`),e.total_done||n||l.push('<div class="muted small">Aquí irá sumando lo que vayas cerrando.</div>'),i("logrosbody").innerHTML=l.join(""),i("logros").hidden=!1}catch(e){}}(),b(),y(),_()}catch(e){i("err").textContent="Sin conexión. Inténtalo de nuevo.",i("err").hidden=!1}else i("err").hidden=!1}function X(e,t){const a=i(e),n=a.textContent;a.textContent=t,a.classList.add("sent"),setTimeout((()=>{a.textContent=n,a.classList.remove("sent")}),2500)}let ee=null;i("bexp").onclick=()=>{if(!ee)return;const e=["MI RESUMEN · "+i("hi").textContent.replace("Hola, ",""),"Generado el "+s,"","Sesiones cerradas en total: "+(ee.total_done||0),"","Últimas semanas (hechas / pautadas):"];(ee.weeks||[]).slice().reverse().forEach((t=>e.push(` ${t.week}: ${t.done} / ${t.total}`)));const t=document.createElement("a");t.href=URL.createObjectURL(new Blob([e.join("\n")],{type:"text/plain;charset=utf-8"})),t.download="mi-resumen-"+s+".txt",document.body.appendChild(t),t.click(),t.remove()},i("bmsg").onclick=async()=>{const e=i("msgtxt").value.trim();if(e){i("bmsg").disabled=!0;try{const t=await h("submit_message",{p_token:o,p_message:e},"m|"+Date.now());x("mmsg",t.ok?t.queued?"Sin conexión: guardado en este móvil, se enviará solo al volver la conexión.":"Enviado ✔ Tu entrenador lo leerá en cuanto abra su panel.":t.error||"No se pudo enviar",t.ok),t.ok&&(i("msgtxt").value="",t.queued||X("bmsg","✔ Enviado"))}catch(e){x("mmsg","No se pudo enviar: sin conexión o el servicio aún no está disponible. Tu texto sigue aquí; inténtalo de nuevo más tarde.",!1)}i("bmsg").disabled=!1}else x("mmsg","Escribe algo primero.",!1)},i("bw").onclick=async()=>{if(t.some((([e])=>!(f[e]>=1&&f[e]<=7))))return void x("mw","Revisa los deslizadores: cada uno va de 1 a 7.",!1);i("bw").disabled=!0;const e=r(i("wkg").value);if(i("wkg").value&&!(e>=30&&e<=250))return x("mw","El peso debe estar entre 30 y 250 kg.",!1),void(i("bw").disabled=!1);try{const t=await h("submit_wellness",{p_token:o,p_day:s,p_sleep:f.sleep,p_fatigue:f.fatigue,p_stress:f.stress,p_pain:f.pain,p_mood:f.mood,p_note:i("wnote").value||null,p_weight:e>=30&&e<=250?e:null},"w|"+s);x("mw",t.ok?t.queued?"Sin conexión: guardado en este móvil, se enviará solo al volver la conexión.":"Guardado. Gracias.":t.error||"No se pudo guardar",t.ok),t.ok&&(q("w|"),t.queued||X("bw","✔ Enviado"))}catch(e){x("mw","Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.",!1)}i("bw").disabled=!1},i("bc").onclick=async()=>{const e=parseInt(i("dur").value,10),t=r(i("rpe").value);if(e>=1&&e<=600&&t>=1&&t<=10){i("bc").disabled=!0;try{const a=P(),n=await h("submit_closing",{p_token:o,p_day:G(),p_label:a?a.title:"",p_duration:e,p_rpe:t,p_note:i("cnote").value||null,p_data:Z()},"c|"+G()+"|"+(a?a.title:""));x("mc",n.ok?n.queued?"Sin conexión: guardado en este móvil, se enviará solo al volver la conexión.":"Enviado. Gracias.":n.error||"No se pudo enviar",n.ok),n.ok&&(q(`c|${a?a.title:""}|`),n.queued||X("bc","✔ Enviado"))}catch(e){x("mc","Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.",!1)}i("bc").disabled=!1}else x("mc","Pon la duración (1-600 min) y el esfuerzo (1-10).",!1)};let te=[];function ae(e){return new Promise(((t,a)=>{const n=URL.createObjectURL(e),o=new Image;o.onload=()=>{const e=Math.min(1,1600/Math.max(o.width,o.height)),a=document.createElement("canvas");a.width=Math.max(1,Math.round(o.width*e)),a.height=Math.max(1,Math.round(o.height*e)),a.getContext("2d").drawImage(o,0,0,a.width,a.height),URL.revokeObjectURL(n);const s=a.toDataURL("image/jpeg",.72);t({b64:s.split(",")[1],thumb:s})},o.onerror=()=>{URL.revokeObjectURL(n),a(new Error("img"))},o.src=n}))}i("capfile").onchange=async e=>{te=[],i("capprev").innerHTML="",x("mcap","",!0);const t=[...e.target.files].slice(0,3);for(const e of t)try{const t=await ae(e);te.push(t),i("capprev").insertAdjacentHTML("beforeend",`<img src="${t.thumb}" style="height:70px;border-radius:8px;border:1px solid var(--bd)">`)}catch(e){x("mcap","No he podido leer una de las imágenes. Prueba con otra captura.",!1)}i("bcap").disabled=!te.length},i("bcap").onclick=async()=>{i("bcap").disabled=!0;let e=0,t="";const a=P();for(const n of te)try{const i=await u("submit_capture",{p_token:o,p_day:s,p_label:a?a.title:"",p_mime:"image/jpeg",p_image:n.b64,p_note:null});i.ok?e++:t=i.error||"no se pudo enviar"}catch(e){t="sin conexión"}e?(x("mcap",`Enviada${e>1?"s":""} ${e} captura${e>1?"s":""}. Gracias: la leemos y apuntamos las series.`,!0),te=[],i("capprev").innerHTML="",i("capfile").value=""):(x("mcap",t?"No se pudo enviar: "+t:"Nada que enviar.",!1),i("bcap").disabled=!te.length)},V();</script>
 </body>
 </html>
