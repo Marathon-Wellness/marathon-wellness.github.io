@@ -152,8 +152,13 @@ const VER = new URLSearchParams(location.search).get("ver") === "1";
 const READ_RPCS = new Set(["app_state", "app_history", "app_pdf"]);
 async function rpc(fn, args) {
   if (VER && !READ_RPCS.has(fn)) throw new Error("solo lectura");
-  const r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, { method: "POST", headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" }, body: JSON.stringify(args) });
-  if (!r.ok) throw new Error("red");
+  // Si el servidor no contesta en 20 s (mala cobertura) se corta: antes el boton se quedaba colgado y no se guardaba nada.
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 20000);
+  let r;
+  try { r = await fetch(`${URL_}/rest/v1/rpc/${fn}`, { method: "POST", signal: ctl.signal, headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" }, body: JSON.stringify(args) }); }
+  catch (e) { const er = new Error("red"); er.net = true; throw er; }
+  finally { clearTimeout(tm); }
+  if (!r.ok) { const er = new Error("http " + r.status); er.http = r.status; throw er; }   // el servidor SI contesto, con un error: no es falta de red
   return r.json();
 }
 // ---- Cola sin conexion: si el envio falla por falta de red, se guarda en este movil y se reenvia solo al volver la conexion (con la pagina abierta).
@@ -164,6 +169,8 @@ async function enviar(fn, args, clave) {
   if (VER) return { ok: false, error: "Modo solo lectura: no se envía nada" };
   try { return await rpc(fn, args); }
   catch (e) {
+    // Un error del servidor (400, 500...) NO es falta de conexion: antes se guardaba en cola y se decia «sin conexion» para siempre.
+    if (e && e.http) return { ok: false, error: "El servicio no pudo guardarlo (código " + e.http + "). Inténtalo en un minuto; si sigue igual, avisa a tu entrenador." };
     const q = loadQ().filter(x => x.k !== clave); q.push({ k: clave, fn, args, day: DAY });
     saveQ(q.slice(-20));
     refrescarCola();
@@ -176,7 +183,12 @@ async function vaciarCola() {
   try {
     let q = loadQ(), enviados = 0;
     while (q.length) {
-      try { await rpc(q[0].fn, q[0].args); enviados++; } catch (e) { break; }   // sigue sin red: se reintenta luego
+      try { await rpc(q[0].fn, q[0].args); enviados++; }
+      catch (e) {
+        // Rechazado por el servidor con un 4xx (salvo 408/429): reintentar no lo arregla, se descarta para no atascar la cola.
+        if (e && e.http >= 400 && e.http < 500 && e.http !== 408 && e.http !== 429) { q = q.slice(1); saveQ(q); continue; }
+        break;   // sigue sin red: se reintenta luego
+      }
       q = q.slice(1); saveQ(q);
     }
     refrescarCola();
