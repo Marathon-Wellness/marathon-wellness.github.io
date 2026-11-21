@@ -78,6 +78,13 @@ summary{font-weight:800}
 .sprog{height:6px;border-radius:5px;background:var(--bd);overflow:hidden;margin:10px 0 2px}.sprog i{display:block;height:100%;width:0;background:var(--grad);transition:width .3s}
 .rest{position:sticky;bottom:10px;z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35);padding:10px 12px;margin-top:14px}
 .rest button.on{background:var(--ac);color:#fff}
+.srow{display:flex;align-items:center;gap:8px;margin-top:8px}
+.srow .sn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--grad);color:#fff;font-weight:800;font-size:.85rem;display:grid;place-items:center}
+.srow input{flex:1;min-width:0;text-align:center;font-weight:700;font-size:1.05rem;padding:10px 4px;border-radius:12px}
+.srow .x{flex:none;color:var(--mut);font-size:.78rem;font-weight:600}
+.srow input:not(:placeholder-shown){border-color:var(--ac);background:rgba(74,163,255,.08)}
+button.anota{margin-top:14px;background:var(--grad);box-shadow:0 6px 16px rgba(94,110,255,.35);border-radius:14px}
+.thb.static{box-shadow:none}
 .felicita{background:var(--grad);color:#fff;border-radius:var(--r);padding:16px;text-align:center;font-weight:800;margin-top:10px;animation:pop .5s ease}
 @keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.felicita,.chip,.bar i{animation:none;transition:none}}
@@ -296,6 +303,7 @@ function fieldKey(el) {
   if (/^s_/.test(el.id) || el.id === "wkg" || el.id === "wnote") return "w|" + el.id;
   const s = current(), t = s ? s.title : "";
   if (el.dataset && el.dataset.ex !== undefined) return `c|${t}|r${el.dataset.ex}_${el.dataset.set}`;
+  if (el.dataset && el.dataset.kex !== undefined) return `c|${t}|k${el.dataset.kex}_${el.dataset.kset}`;
   return el.id ? `c|${t}|${el.id}` : null;
 }
 function guardarBorrador(e) {
@@ -308,14 +316,14 @@ function restaurarBorrador(prefix) {
   if (VER) return 0;
   const d = loadD(); let n = 0;
   Object.keys(d).filter(k => k.startsWith(prefix)).forEach(k => {
-    const id = k.split("|").pop(), m = /^r(\d+)_(\d+)$/.exec(id);
+    const id = k.split("|").pop(), m = /^r(\d+)_(\d+)$/.exec(id), mk = /^k(\d+)_(\d+)$/.exec(id);
     const mr = /^rir_(\d+)$/.exec(id);
     if (mr) {   // semaforo de repeticiones en reserva
       const ex = ((current() || {}).body || {}).ex || [], e = ex[+mr[1]];
       if (e && ["0", "1-3", "4+"].includes(d[k])) { RIRSEL[e.name] = d[k]; document.querySelectorAll(`.rp[data-rp="${mr[1]}"] button`).forEach(b => b.setAttribute("aria-checked", String(b.dataset.v === d[k]))); n++; }
       return;
     }
-    const el = m ? document.querySelector(`input[data-ex="${m[1]}"][data-set="${m[2]}"]`) : $(id);
+    const el = m ? document.querySelector(`input[data-ex="${m[1]}"][data-set="${m[2]}"]`) : mk ? document.querySelector(`input[data-kex="${mk[1]}"][data-kset="${mk[2]}"]`) : $(id);
     if (!el) return;
     if (el.type === "checkbox") el.checked = !!d[k]; else el.value = d[k];
     const sl = /^s_(\w+)$/.exec(id); if (sl) { vals[sl[1]] = +d[k]; $("v_" + sl[1]).textContent = d[k]; }
@@ -393,12 +401,20 @@ function showSessions() {
     }
     return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}${cal}${cuerpo}`
       + (b.nota_entrenador ? `<div class="callout">${esc(b.nota_entrenador)}</div>` : "")
+      + ((b.ex || []).length ? `<button type="button" class="anota" data-anota="${si}">✍️ Anotar kilos y repeticiones</button>` : "")
       + `<button class="pdf" data-i="${si}">📄 Descargar el PDF de esta sesión</button><div class="msg"></div></div>`;
   }).join("");
   document.querySelectorAll("#sesbody .pdf").forEach(b => b.onclick = () => bajarPdf(SESSIONS[+b.dataset.i], b));
 }
 // Miniaturas que no cargan (sin red): se ocultan y la tarjeta queda solo con el texto.
 document.addEventListener("error", ev => { const i = ev.target; if (i && i.tagName === "IMG" && i.closest && i.closest(".thb")) { const c = i.closest(".ex"); i.closest(".thb").remove(); if (c) c.classList.add("nothumb"); } }, true);
+document.addEventListener("click", ev => {
+  const t = ev.target.closest ? ev.target.closest("[data-anota]") : null; if (!t) return;
+  const s = SESSIONS[+t.dataset.anota]; if (!s) return;
+  const k = closables().findIndex(x => x.title === s.title);
+  if (k >= 0 && $("selses")) { $("selses").value = String(k); if ($("selses").onchange) $("selses").onchange(); }
+  $("ccard").open = true; $("ccard").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 // Casillas de series (solo en pantalla, no se guardan): sirven para llevar la cuenta durante la sesion.
 document.addEventListener("click", ev => {
   const ch = ev.target.closest ? ev.target.closest(".chip") : null; if (!ch) return;
@@ -529,17 +545,17 @@ function buildClosingForm() {
   Object.entries(pd.rir || {}).forEach(([n, v]) => { if (["0", "1-3", "4+"].includes(v)) RIRSEL[n] = v; });
   if ((b.ex || []).length) {
     box.hidden = false;
-    if (!need.length) {
-      box.innerHTML = `<div class="muted small" style="margin-bottom:14px">Todo está fijado en esta sesión: no hace falta anotar series. Si cambiaste algo, escríbelo en la nota.</div>`;
-    } else {
-      box.innerHTML = `<h3>Series de hoy</h3><div class="muted small" style="margin-bottom:8px">Anota solo lo que hiciste distinto de lo pautado o lo que no tenía peso fijado. Lo que dejes en blanco lo damos por hecho como estaba pautado.</div>` + need.map((e, i) => {
+    {
+      box.innerHTML = `<h3>Mis series de hoy</h3><div class="muted small" style="margin-bottom:6px">Pon los <b>kilos</b> y las <b>repeticiones</b> que hiciste en cada serie. Si hiciste justo lo pautado (el número gris), puedes dejarlo en blanco.</div>` + b.ex.map((e, i) => {
         const old = (pd.sets || []).find(x => x.ex === e.name) || {};
-        const kgv = old.kg ?? (e.kg || "");
-        const reps = [...Array(e.sets)].map((_, j) => `<input type="number" inputmode="numeric" min="1" max="100" placeholder="rep ${j + 1}" data-ex="${i}" data-set="${j}" value="${(old.reps || [])[j] ?? ""}">`).join("");
+        const src = e.gifurl || (e.gif && b.gifbase ? b.gifbase + e.gif + ".gif" : "");
+        const ph = e.kg ? String(e.kg).replace(".", ",") : (e.kg === 0 ? "0" : "kg");
         const kgTxt = e.kg ? `pautado ${e.kg} kg${e.per_hand ? " por mano" : ""}` : (e.kg === 0 ? "peso corporal" : "peso a tantear");
-        return `<div class="ex"><div class="t">${esc(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min === e.rep_max ? e.rep_min : e.rep_min + "-" + e.rep_max} · ${kgTxt}</div>
-          <div class="two" style="margin-top:6px"><div><label class="lb">Kilos${e.per_hand ? " (por mano)" : ""}${e.kg === 0 ? " (0 = peso corporal)" : ""}</label><input type="text" inputmode="decimal" autocomplete="off" id="kg_${i}" value="${kgv}"></div></div>
-          <label class="lb" style="margin-top:6px">Repeticiones de cada serie</label><div class="sets">${reps}</div></div>`;
+        const filas = [...Array(e.sets)].map((_, j) => `<div class="srow"><span class="sn">${j + 1}</span>`
+          + `<input type="text" inputmode="decimal" autocomplete="off" placeholder="${ph}" data-kex="${i}" data-kset="${j}" value="${(old.kgs || [])[j] ?? old.kg ?? ""}" aria-label="Kilos de la serie ${j + 1} de ${esc(e.name)}"><span class="x">kg ×</span>`
+          + `<input type="number" inputmode="numeric" min="1" max="100" placeholder="${e.rep_max}" data-ex="${i}" data-set="${j}" value="${(old.reps || [])[j] ?? ""}" aria-label="Repeticiones de la serie ${j + 1} de ${esc(e.name)}"><span class="x">reps</span></div>`).join("");
+        return `<div class="ex${src ? "" : " nothumb"}">` + (src ? `<div class="thb static"><img loading="lazy" decoding="async" src="${esc(src)}" alt=""></div>` : "")
+          + `<div class="exb"><div class="t">${esc(e.name)}</div><div class="muted small">${e.sets} × ${e.rep_min === e.rep_max ? e.rep_min : e.rep_min + "-" + e.rep_max} · ${kgTxt}${e.per_hand ? " (kilos por mano)" : ""}</div>${filas}</div></div>`;
       }).join("") + `<div style="height:14px"></div>`;
     }
     box.insertAdjacentHTML("beforeend", rpHtml(b.ex) + `<div style="height:14px"></div>`);
@@ -565,25 +581,32 @@ $("madd").onclick = () => { if (MOLS.length >= 6) return; MOLS.push({ z: $("mzon
 $("mlist").onclick = ev => { const b = ev.target.closest ? ev.target.closest("[data-mx]") : null; if (!b) return; MOLS.splice(+b.dataset.mx, 1); renderMols(); };
 // Pesos raros o muy lejos de lo pautado: se pregunta antes de enviar (el cliente decide).
 function revisarPesos() {
-  const s = current(), b = (s && s.body) || {}, avisos = [];
-  (b.ex || []).filter(e => e.need).forEach((e, i) => {
-    const el = $("kg_" + i); if (!el || el.value === "") return;
+  const s = current(), b = (s && s.body) || {}, avisos = [], vistos = new Set();
+  document.querySelectorAll("input[data-kex]").forEach(el => {
+    if (el.value === "") return;
+    const e = (b.ex || [])[+el.dataset.kex]; if (!e || vistos.has(e.name)) return;
     const kg = num(el.value); if (!(kg > 0)) return;
-    if (Math.abs(kg * 2 - Math.round(kg * 2)) > 0.001) avisos.push(`${e.name}: ${el.value} kg no es un peso habitual (se suele subir de 0,5 en 0,5)`);
-    else if (e.kg && (kg < e.kg * 0.7 || kg > e.kg * 1.3)) avisos.push(`${e.name}: pautado ${e.kg} kg y has puesto ${el.value} kg`);
+    if (Math.abs(kg * 2 - Math.round(kg * 2)) > 0.001) { avisos.push(`${e.name}: ${el.value} kg no es un peso habitual (se suele subir de 0,5 en 0,5)`); vistos.add(e.name); }
+    else if (e.kg && (kg < e.kg * 0.7 || kg > e.kg * 1.3)) { avisos.push(`${e.name}: pautado ${e.kg} kg y has puesto ${el.value} kg`); vistos.add(e.name); }
   });
   return avisos;
 }
 function collectData() {
   const s = current(), b = (s && s.body) || {};
   const data = {};
-  const need = (b.ex || []).filter(e => e.need);
   const sets = [];
-  need.forEach((e, i) => {
-    const reps = [...document.querySelectorAll(`input[data-ex="${i}"]`)].map(x => parseInt(x.value, 10)).filter(n => n >= 1 && n <= 100);
+  (b.ex || []).forEach((e, i) => {
+    const reps = [], kgs = [];
+    let ult = e.kg != null ? e.kg : null;
+    for (let j = 0; j < (+e.sets || 0); j++) {
+      const r = parseInt((document.querySelector(`input[data-ex="${i}"][data-set="${j}"]`) || {}).value, 10);
+      const kv = num((document.querySelector(`input[data-kex="${i}"][data-kset="${j}"]`) || {}).value);
+      if (kv >= 0) ult = kv;                       // sin kilos en una serie: los de la anterior (o los pautados)
+      if (r >= 1 && r <= 100) { reps.push(r); kgs.push(ult != null && ult >= 0 ? ult : null); }
+    }
     if (!reps.length) return;
-    const kg = num($("kg_" + i).value);
-    sets.push({ ex: e.name, kg: kg >= 0 ? kg : null, reps });
+    const k0 = kgs.find(x => x != null);
+    sets.push({ ex: e.name, kg: k0 != null ? k0 : null, kgs: kgs.map(x => x != null ? x : -1), reps });
   });
   if (sets.length) data.sets = sets;
   const rir = {};   // semaforo opcional: solo los ejercicios en que el cliente toco un boton
