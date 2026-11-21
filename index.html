@@ -48,12 +48,44 @@ button.vbtn:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){#ejv .fr img+img{animation:none;opacity:0}#ejv .fr:hover img+img,#ejv .fr:focus img+img{opacity:1}}
 #ejv h3{margin:0 0 8px}
 #ejv .x{margin-top:10px;width:100%;padding:10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;font-size:16px;color:#0f172a}
+
+/* ---- Diseno 21-nov: identidad, jerarquia y tarjetas de ejercicio ---- */
+:root{--ac2:#7c5cff;--grad:linear-gradient(135deg,#4aa3ff 0%,#7c5cff 100%);--sh:0 6px 22px rgba(0,0,0,.28);--r:18px}
+@media (prefers-color-scheme:light){:root{--sh:0 6px 20px rgba(30,41,90,.10)}}
+body{background:radial-gradient(1200px 500px at 50% -120px,rgba(124,92,255,.16),transparent 70%),var(--bg);background-attachment:fixed;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.005em}
+.card{border-radius:var(--r);box-shadow:var(--sh);padding:16px;transition:transform .15s}
+h1{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;margin:0}
+h2{font-size:1.15rem;font-weight:800;letter-spacing:-.01em}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:6px 0 16px}
+.hero .sub{margin:2px 0 0}.hero .sub::first-letter{text-transform:uppercase}
+#ring{--p:0;width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--bd) 0);position:relative}
+#ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--bg)}
+#ring span{position:relative;font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums}
+#ring small{display:block;font-size:.6rem;font-weight:600;color:var(--mut);text-align:center;margin-top:-2px}
+#bw,#bc,#bcap,#bact,#bexp{background:var(--grad);box-shadow:0 6px 16px rgba(94,110,255,.35);border-radius:14px;padding:15px;letter-spacing:.01em;transition:transform .12s,filter .12s}
+#bw:active,#bc:active,#bcap:active,#bact:active,#bexp:active{transform:scale(.98);filter:brightness(1.1)}
+summary{font-weight:800}
+.bar{height:10px;border-radius:8px}.bar i{background:var(--grad);transition:width .5s}
+.ex{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:start;padding:14px 0}
+.ex.nothumb{grid-template-columns:1fr}
+.thb{position:relative;width:84px;height:84px;padding:0;border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--bd);box-shadow:var(--sh)}
+.thb img{width:100%;height:100%;object-fit:contain;display:block}
+.thb .play{position:absolute;right:4px;bottom:4px;width:22px;height:22px;border-radius:50%;background:rgba(15,17,21,.75);color:#fff;font-size:.65rem;display:grid;place-items:center;padding-left:2px}
+.ex .t{font-weight:700;font-size:1.02rem;line-height:1.25}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{width:auto;min-width:44px;min-height:40px;padding:6px 12px;border-radius:12px;background:transparent;color:var(--tx);border:2px solid var(--bd);font:700 .9rem system-ui;transition:all .15s}
+.chip.on{background:var(--ok);border-color:var(--ok);color:#06281a;transform:scale(1.04)}
+.sprog{height:6px;border-radius:5px;background:var(--bd);overflow:hidden;margin:10px 0 2px}.sprog i{display:block;height:100%;width:0;background:var(--grad);transition:width .3s}
+.rest{position:sticky;bottom:10px;z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35);padding:10px 12px;margin-top:14px}
+.rest button.on{background:var(--ac);color:#fff}
+.felicita{background:var(--grad);color:#fff;border-radius:var(--r);padding:16px;text-align:center;font-weight:800;margin-top:10px;animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.felicita,.chip,.bar i{animation:none;transition:none}}
 </style>
 </head>
 <body>
 <div id="verbanner" role="status" aria-live="polite" hidden></div>
-<h1 id="hi">Mi día</h1>
-<div class="sub" id="day"></div>
+<div class="hero"><div><h1 id="hi">Mi día</h1><div class="sub" id="day"></div></div><div id="ring" hidden aria-label="Progreso de la semana"><div><span id="ringn"></span><small>semana</small></div></div></div>
 <div id="err" class="card bad" hidden>Enlace no válido. Pídele a tu entrenador un enlace nuevo.</div>
 <div id="offlinetag" class="card" hidden></div>
 <div id="app" hidden>
@@ -302,6 +334,7 @@ function showWeek() {
   $("week").hidden = !WEEK.length;
   if (!WEEK.length) return;
   const hechas = WEEK.filter(w => w.done).length, pct = Math.round(100 * hechas / WEEK.length);
+  $("ring").hidden = false; $("ring").style.setProperty("--p", pct); $("ringn").textContent = hechas + "/" + WEEK.length;
   const libre = w => !w.done && !MOVED && w.day >= DAY && (w.moves || []).some(m => m >= DAY);
   $("weekbody").innerHTML = `<div><b>${hechas}</b> de ${WEEK.length} sesiones cerradas</div><div class="bar"><i style="width:${pct}%"></i></div>`
     + WEEK.map((w, i) => `<div class="wk${w.day === DAY ? " hoy" : ""}" data-i="${i}"><div class="t">${w.done ? "✓ " : ""}${esc(w.title)}</div><div class="d">${fmtDay(w.day)}${w.day === DAY ? " · hoy" : ""}</div>${libre(w) ? `<button class="chg" data-i="${i}">Cambiar de día</button>` : ""}</div>`).join("")
@@ -328,7 +361,7 @@ function abrirCambio(i) {
 // GIF de cada ejercicio: llegan con la sesion del cliente (la pagina no lleva ni la lista ni las direcciones).
 function verGif(titulo, items, base) {
   const f = $("ejf"); $("ejt").textContent = titulo;
-  f.innerHTML = items.map(([g, t]) => `<figure style="margin:0 0 10px"><img src="${esc(base + g)}.gif" alt="${esc(t)}" style="position:static;height:auto"><figcaption class="small muted">${esc(t)}</figcaption></figure>`).join("");
+  f.innerHTML = items.map(([g, t]) => `<figure style="margin:0 0 10px"><img src="${esc(String(g).startsWith("data:") ? g : base + g + ".gif")}" alt="${esc(t)}" style="position:static;height:auto"><figcaption class="small muted">${esc(t)}</figcaption></figure>`).join("");
   f.querySelectorAll("img").forEach(i => { i.onerror = () => { i.parentNode.innerHTML = "No se pudo cargar. Prueba con mejor conexión."; }; });
   $("ejv").showModal();
 }
@@ -344,14 +377,17 @@ function showSessions() {
     const cal = (b.calentamiento || []).length ? `<details class="det"><summary>Antes de empezar</summary><ul>${b.calentamiento.map((x, ci) => `<li><b>${esc(x.k)}:</b> ${esc(x.v)}${x.gifs && b.gifbase ? `<button type="button" class="vbtn" data-si="${si}" data-mi="${ci}" aria-label="Ver ejercicios de movilidad">Ver</button>` : ""}</li>`).join("")}</ul></details>` : "";
     let cuerpo;
     if ((b.ex || []).length) {
-      cuerpo = b.ex.map((e, i) => `<div class="ex"><div class="t">${i + 1}. ${esc(e.name)}${e.gif && b.gifbase ? `<button type="button" class="vbtn" data-si="${si}" data-ei="${i}" aria-label="Ver cómo se hace ${esc(e.name)}">Ver</button>` : ""}</div>`
+      cuerpo = `<div class="sprog" aria-hidden="true"><i></i></div><div class="muted small sprogt">0 de ${b.ex.reduce((a, e) => a + (+e.sets || 0), 0)} series</div>` + b.ex.map((e, i) => { const src = e.gifurl || (e.gif && b.gifbase ? b.gifbase + e.gif + ".gif" : ""); return `<div class="ex${src ? "" : " nothumb"}">`
+        + (src ? `<button type="button" class="thb" data-si="${si}" data-ei="${i}" aria-label="Ver cómo se hace ${esc(e.name)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt=""><span class="play">▶</span></button>` : "") + `<div class="exb"><div class="t">${i + 1}. ${esc(e.name)}</div>`
         + `<div class="muted small">${e.sets} × ${e.rep_min === e.rep_max ? e.rep_min : e.rep_min + "-" + e.rep_max}${carga(e)}${e.descanso ? " · descanso " + esc(e.descanso) : ""}</div>`
         + (e.lesion ? `<div class="small bad">⚠️ ${esc(e.lesion)}</div>` : "")
-        + (e.nota ? `<div class="small">${esc(e.nota)}</div>` : "") + `</div>`).join("");
+        + (e.nota ? `<div class="small">${esc(e.nota)}</div>` : "")
+        + `<div class="chips" role="group" aria-label="Series de ${esc(e.name)}">${Array.from({ length: +e.sets || 0 }, (_, k) => `<button type="button" class="chip" aria-pressed="false">${k + 1}</button>`).join("")}</div></div></div>`; }).join("");
     } else if ((b.bloques || []).length) {
-      cuerpo = b.bloques.map(x => `<div class="ex"><div class="t">${esc(x.nombre)} · ${x.minutos} min</div>`
+      cuerpo = b.bloques.map(x => { const src = x.gif && b.gifbase ? b.gifbase + x.gif + ".gif" : ""; return `<div class="ex${src ? "" : " nothumb"}">`
+        + (src ? `<button type="button" class="thb" data-si="${si}" data-bi="${b.bloques.indexOf(x)}" aria-label="Ver cómo se hace ${esc(x.nombre)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt=""><span class="play">▶</span></button>` : "") + `<div class="exb"><div class="t">${esc(x.nombre)} · ${x.minutos} min</div>`
         + `<div class="small">${[x.esfuerzo ? "esfuerzo " + esc(x.esfuerzo) + "/10" : "", x.pulso ? esc(x.pulso) : "", x.ritmo ? esc(x.ritmo) : "", x.test_habla ? esc(x.test_habla) : "", x.recuperacion ? esc(x.recuperacion) : ""].filter(Boolean).join(" · ")}</div>`
-        + (x.como ? `<div class="small muted">${esc(x.como)}</div>` : "") + `</div>`).join("");
+        + (x.como ? `<div class="small muted">${esc(x.como)}</div>` : "") + `</div></div>`; }).join("");
     } else {
       cuerpo = `<ul>${(b.items || []).map(i => `<li>${esc(i)}</li>`).join("")}</ul>`;
     }
@@ -361,12 +397,26 @@ function showSessions() {
   }).join("");
   document.querySelectorAll("#sesbody .pdf").forEach(b => b.onclick = () => bajarPdf(SESSIONS[+b.dataset.i], b));
 }
+// Miniaturas que no cargan (sin red): se ocultan y la tarjeta queda solo con el texto.
+document.addEventListener("error", ev => { const i = ev.target; if (i && i.tagName === "IMG" && i.closest && i.closest(".thb")) { const c = i.closest(".ex"); i.closest(".thb").remove(); if (c) c.classList.add("nothumb"); } }, true);
+// Casillas de series (solo en pantalla, no se guardan): sirven para llevar la cuenta durante la sesion.
+document.addEventListener("click", ev => {
+  const ch = ev.target.closest ? ev.target.closest(".chip") : null; if (!ch) return;
+  const on = ch.classList.toggle("on"); ch.setAttribute("aria-pressed", on ? "true" : "false");
+  const box = ch.closest(".ses"); if (!box) return;
+  const all = box.querySelectorAll(".chip").length, hechas = box.querySelectorAll(".chip.on").length;
+  const bar = box.querySelector(".sprog i"), tx = box.querySelector(".sprogt");
+  if (bar) bar.style.width = (all ? Math.round(100 * hechas / all) : 0) + "%"; if (tx) tx.textContent = hechas + " de " + all + " series";
+  let f = box.querySelector(".felicita");
+  if (all && hechas === all) { if (!f) { f = document.createElement("div"); f.className = "felicita"; f.textContent = "¡Sesión completada! 💪 Ahora cuéntanos cómo te fue en «Cerrar la sesión»."; box.appendChild(f); } } else if (f) f.remove();
+});
 document.addEventListener("click", ev => {
   const t = ev.target.closest ? ev.target : null; if (!t) return;
   if (t.closest("#ejx")) { $("ejv").close(); return; }
   const b = t.closest("[data-si]"); if (!b) return;
   const s = (SESSIONS[+b.dataset.si] || {}).body || {};
-  if (b.dataset.ei != null) { const e = (s.ex || [])[+b.dataset.ei]; if (e && e.gif && s.gifbase) verGif(e.name, [[e.gif, "Así se hace el movimiento."]], s.gifbase); }
+  if (b.dataset.bi != null) { const x = (s.bloques || [])[+b.dataset.bi]; if (x && x.gif && s.gifbase) verGif(x.nombre, [[x.gif, x.como || "Así se hace."]], s.gifbase); }
+  else if (b.dataset.ei != null) { const e = (s.ex || [])[+b.dataset.ei]; if (e && (e.gifurl || (e.gif && s.gifbase))) verGif(e.name, [[e.gifurl || e.gif, "Así se hace el movimiento."]], s.gifbase || ""); }
   else { const c = (s.calentamiento || [])[+b.dataset.mi]; if (c && c.gifs && s.gifbase) verGif("Movilidad", c.gifs, s.gifbase); }
 });
 // ---- PDF de la sesión: el panel lo genera y lo sube; aquí solo se pide al pulsar y se descarga en el móvil.
