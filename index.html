@@ -96,10 +96,22 @@ button.vbtn:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
       <div><label class="lb">Esfuerzo global (1-10)</label><input id="rpe" type="text" inputmode="decimal" autocomplete="off"></div>
     </div>
     <div style="height:10px"></div>
+    <details class="det" id="molbox"><summary>¿Alguna molestia o dolor? <span class="muted small">(opcional: ayuda a ajustar tu próxima sesión)</span></summary>
+      <div class="two" style="margin-top:8px">
+        <div><label class="lb">Zona</label><select id="mzona" style="width:100%;padding:10px;font:inherit"><option value="hombro">Hombro</option><option value="codo">Codo</option><option value="muñeca">Muñeca</option><option value="rodilla">Rodilla</option><option value="lumbar">Lumbar</option><option value="cadera">Cadera</option><option value="tobillo">Tobillo</option><option value="otra">Otra</option></select></div>
+        <div><label class="lb">Lado</label><select id="mlado" style="width:100%;padding:10px;font:inherit"><option value="">—</option><option value="izquierda">Izquierda</option><option value="derecha">Derecha</option><option value="ambas">Ambas</option></select></div>
+      </div>
+      <label class="lb" style="margin-top:8px">Cuánto molesta (0 nada · 10 máximo): <b id="mnv">3</b></label>
+      <input id="mniv" type="range" min="0" max="10" value="3">
+      <button type="button" id="madd" class="pdf" style="margin-top:8px">Añadir molestia</button>
+      <div id="mlist" class="muted small"></div>
+    </details>
+    <div style="height:10px"></div>
     <textarea id="cnote" rows="2" maxlength="500" placeholder="Molestias o cambios sobre lo pautado (opcional)"></textarea>
     <div style="height:10px"></div>
     <button id="bc">Enviar cierre</button><div class="msg" id="mc"></div>
   </details>
+  <details class="card"><summary>🔧 Diagnóstico <span class="muted small">(si algo falla, enséñaselo a tu entrenador)</span></summary><div id="diag" class="small muted" style="line-height:1.6"></div></details>
   <details class="card">
     <summary>📷 Mandar una captura <span class="muted small">(opcional)</span></summary>
     <div class="muted small" style="margin-bottom:10px">Una foto de tus ejercicios de hoy (libreta, app del gimnasio, reloj). Apuntamos las series por ti. Hasta 3 a la vez.</div>
@@ -165,12 +177,27 @@ async function rpc(fn, args) {
 const QK = `mw_queue_${TOKEN}`;
 const loadQ = () => { if (VER) return []; try { return JSON.parse(localStorage.getItem(QK) || "[]"); } catch (e) { return []; } };
 const saveQ = q => { if (VER) return; try { q.length ? localStorage.setItem(QK, JSON.stringify(q)) : localStorage.removeItem(QK); } catch (e) { /* sin almacenamiento: no hay cola */ } };
+const APP_VERSION = "2026-11-21";
+let ULTIMO = null;   // solo en memoria: el diagnostico cuenta lo ocurrido desde que se abrio la pagina (no toca el almacenamiento local)
+function marcarEnvio(ok, detalle) {
+  if (VER) return;
+  ULTIMO = { t: Date.now(), ok, d: detalle || "" };
+  renderDiag();
+}
+function renderDiag() {
+  const el = document.getElementById("diag"); if (!el) return;
+  const last = ULTIMO;
+  const nav = ((navigator.userAgent || "").match(/(Chrome|Firefox|Safari|CriOS|FxiOS)\/[\d.]+/) || ["?"])[0];
+  el.innerHTML = `Versión de la app: ${APP_VERSION}<br>Conexión: ${navigator.onLine === false ? "sin red" : "con red"}<br>Envíos pendientes en este móvil: ${loadQ().length}<br>`
+    + `Último envío: ${last ? new Date(last.t).toLocaleString("es-ES") + " · " + (last.ok ? "bien" : "falló (" + String(last.d).replace(/[<>&]/g, "") + ")") : "ninguno desde que abriste esta página"}<br>Navegador: ${nav}`;
+}
 async function enviar(fn, args, clave) {
   if (VER) return { ok: false, error: "Modo solo lectura: no se envía nada" };
-  try { return await rpc(fn, args); }
+  try { const r = await rpc(fn, args); marcarEnvio(true); return r; }
   catch (e) {
     // Un error del servidor (400, 500...) NO es falta de conexion: antes se guardaba en cola y se decia «sin conexion» para siempre.
-    if (e && e.http) return { ok: false, error: "El servicio no pudo guardarlo (código " + e.http + "). Inténtalo en un minuto; si sigue igual, avisa a tu entrenador." };
+    if (e && e.http) { marcarEnvio(false, "código " + e.http); return { ok: false, error: "El servicio no pudo guardarlo (código " + e.http + "). Inténtalo en un minuto; si sigue igual, avisa a tu entrenador." }; }
+    marcarEnvio(false, e && e.name === "AbortError" ? "sin respuesta en 20 s" : "sin conexión");
     const q = loadQ().filter(x => x.k !== clave); q.push({ k: clave, fn, args, day: DAY });
     saveQ(q.slice(-20));
     refrescarCola();
@@ -183,7 +210,7 @@ async function vaciarCola() {
   try {
     let q = loadQ(), enviados = 0;
     while (q.length) {
-      try { await rpc(q[0].fn, q[0].args); enviados++; }
+      try { await rpc(q[0].fn, q[0].args); enviados++; marcarEnvio(true); }
       catch (e) {
         // Rechazado por el servidor con un 4xx (salvo 408/429): reintentar no lo arregla, se descarta para no atascar la cola.
         if (e && e.http >= 400 && e.http < 500 && e.http !== 408 && e.http !== 429) { q = q.slice(1); saveQ(q); continue; }
@@ -478,6 +505,25 @@ function buildClosingForm() {
   if (!prev.duration_min && restaurarBorrador(`c|${s ? s.title : ""}|`)) say("mc", "Recuperé lo que tenías a medias. Revísalo y envíalo.", true);
   bloquearEscrituras();
 }
+// ---- Molestias (opcional): zona, lado y nivel 0-10. Viajan en p_data.molestias; el panel las usa para proponer ajustes a la sesion siguiente.
+let MOLS = [];
+function renderMols() {
+  $("mlist").innerHTML = MOLS.length ? MOLS.map((m, i) => `<div>• ${esc(m.z)}${m.l ? " " + esc(m.l) : ""} ${m.n}/10 <button type="button" class="vbtn" data-mx="${i}">Quitar</button></div>`).join("") : "";
+}
+$("mniv").oninput = () => { $("mnv").textContent = $("mniv").value; };
+$("madd").onclick = () => { if (MOLS.length >= 6) return; MOLS.push({ z: $("mzona").value, l: $("mlado").value, n: parseInt($("mniv").value, 10) }); renderMols(); };
+$("mlist").onclick = ev => { const b = ev.target.closest ? ev.target.closest("[data-mx]") : null; if (!b) return; MOLS.splice(+b.dataset.mx, 1); renderMols(); };
+// Pesos raros o muy lejos de lo pautado: se pregunta antes de enviar (el cliente decide).
+function revisarPesos() {
+  const s = current(), b = (s && s.body) || {}, avisos = [];
+  (b.ex || []).filter(e => e.need).forEach((e, i) => {
+    const el = $("kg_" + i); if (!el || el.value === "") return;
+    const kg = num(el.value); if (!(kg > 0)) return;
+    if (Math.abs(kg * 2 - Math.round(kg * 2)) > 0.001) avisos.push(`${e.name}: ${el.value} kg no es un peso habitual (se suele subir de 0,5 en 0,5)`);
+    else if (e.kg && (kg < e.kg * 0.7 || kg > e.kg * 1.3)) avisos.push(`${e.name}: pautado ${e.kg} kg y has puesto ${el.value} kg`);
+  });
+  return avisos;
+}
 function collectData() {
   const s = current(), b = (s && s.body) || {};
   const data = {};
@@ -493,6 +539,7 @@ function collectData() {
   const rir = {};   // semaforo opcional: solo los ejercicios en que el cliente toco un boton
   (b.ex || []).forEach(e => { if (["0", "1-3", "4+"].includes(RIRSEL[e.name])) rir[e.name] = RIRSEL[e.name]; });
   if (Object.keys(rir).length) data.rir = rir;
+  if (MOLS.length) data.molestias = MOLS.map(m => ({ z: m.z, l: m.l, n: m.n }));
   // Lo que no se anota se da por hecho como pautado (todo en blanco = sesion como estaba; algunos = solo esos cambiaron).
   const hechos = new Set(sets.map(x => x.ex));
   const comoPautado = (b.ex || []).filter(e => !hechos.has(e.name)).map(e => e.name);
@@ -613,12 +660,14 @@ $("bw").onclick = async () => {
 $("bc").onclick = async () => {
   const dur = parseInt($("dur").value, 10), rpe = num($("rpe").value);
   if (!(dur >= 1 && dur <= 600) || !(rpe >= 1 && rpe <= 10)) { say("mc", "Pon la duración (1-600 min) y el esfuerzo (1-10).", false); return; }
+  const av = revisarPesos();
+  if (av.length && typeof confirm === "function" && !confirm("Revisa estos pesos:\n\n" + av.join("\n") + "\n\n¿Los dejo así? (Aceptar = enviar tal cual · Cancelar = corregir)")) return;
   $("bc").disabled = true;
   try {
     const s = current();
     const r = await enviar("submit_closing", { p_token: TOKEN, p_day: closeDay(), p_label: s ? s.title : "", p_duration: dur, p_rpe: rpe, p_note: $("cnote").value || null, p_data: collectData() }, "c|" + closeDay() + "|" + (s ? s.title : ""));
     say("mc", r.ok ? (r.queued ? "Sin conexión: guardado en este móvil, se enviará solo al volver la conexión." : "Enviado. Gracias.") : (r.error || "No se pudo enviar"), r.ok);
-    if (r.ok) { borrarBorrador(`c|${s ? s.title : ""}|`); if (!r.queued) confirmar("bc", "✔ Enviado"); }
+    if (r.ok) { borrarBorrador(`c|${s ? s.title : ""}|`); MOLS = []; renderMols(); if (!r.queued) confirmar("bc", "✔ Enviado"); }
   } catch (e) { say("mc", "Sin conexión. Lo que escribiste queda guardado en este móvil: inténtalo de nuevo cuando tengas cobertura.", false); }
   $("bc").disabled = false;
 };
@@ -661,6 +710,7 @@ $("bcap").onclick = async () => {
   else { say("mcap", err ? "No se pudo enviar: " + err : "Nada que enviar.", false); $("bcap").disabled = !CAPS.length; }
 };
 load();
+renderDiag();
 </script>
 <dialog id="ejv" aria-labelledby="ejt"><div class="in"><h3 id="ejt"></h3><div class="fr" id="ejf" tabindex="0"></div><div class="muted small" style="margin-top:8px">Así se hace el movimiento.</div><button type="button" class="x" id="ejx">Cerrar</button></div></dialog>
 </body>
