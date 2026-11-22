@@ -177,6 +177,20 @@ button.empezar{margin-top:14px;background:var(--grad);box-shadow:0 6px 16px rgba
 .tour-hl{position:relative;z-index:71;box-shadow:0 0 0 9999px rgba(0,0,0,.62);border-radius:16px;outline:3px solid #ffb300;outline-offset:2px}
 #tourbox{position:fixed;left:12px;right:12px;bottom:14px;z-index:72;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:496px;margin:auto}
 #tourbox .tt{font-weight:700;font-size:1rem;margin-bottom:10px}#tourbox .tb{display:flex;align-items:center;gap:8px}#tourbox .tb span{flex:1}#tourbox button{width:auto;padding:9px 16px}#tourbox button.ghost{background:transparent;color:var(--mut)}
+.cb{border:2px solid var(--bd);border-left:6px solid var(--z,var(--ac));border-radius:16px;padding:10px 12px;margin-top:10px}
+.cbh{display:flex;gap:10px;align-items:center}.cbh .thb{width:64px;height:64px;flex:none}.cbt{flex:1;min-width:0}.cbt .t{font-weight:800}
+.cch{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}.cch span{background:var(--bg);border:1px solid var(--bd);border-radius:999px;padding:3px 9px;font-size:.74rem;font-weight:700}
+.tl{display:flex;gap:2px;height:14px;margin:10px 0 4px;border-radius:8px;overflow:hidden}.tl i{min-width:2px;background:var(--z,var(--ac));border-radius:2px}.tl i.r{background:var(--bd)}.tl i.c{background:#38bdf8}
+ul.cues{margin:8px 0 0;padding-left:18px;font-size:.84rem;color:var(--mut)}
+button.vbtn2{width:auto;margin-top:8px;padding:8px 12px;border-radius:12px;background:transparent;color:var(--ac);border:1px solid var(--ac);font:700 .8rem system-ui;box-shadow:none}
+.cbar{display:flex;justify-content:flex-end;margin-top:4px}.cbar .vbtn2{margin-top:0}
+.alt{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.alt button{width:auto;padding:7px 11px;border-radius:999px;background:transparent;color:var(--tx);border:2px solid var(--bd);font:700 .76rem system-ui;box-shadow:none}.alt button.on{border-color:var(--ac);background:rgba(74,163,255,.14)}
+.zonas{display:grid;gap:8px;margin-top:10px}.zn2{display:flex;gap:10px;align-items:center;border:2px solid var(--bd);border-left:6px solid var(--z);border-radius:14px;padding:8px 10px}.zn2.use{background:rgba(74,163,255,.1);border-color:var(--z)}
+.zn2>b{font-size:1.1rem;color:var(--z);min-width:28px}.zt{font-weight:800;font-size:.9rem}.zs{font-size:.78rem;color:var(--mut)}
+.cfase{margin-top:14px;text-align:center;font:800 1.1rem system-ui;letter-spacing:.08em;color:#fff;background:var(--z,var(--ac));border-radius:14px;padding:8px}
+.cnom{text-align:center;margin-top:8px;color:var(--mut);font-weight:700}
+.ccount{text-align:center;font:800 5.2rem/1.1 system-ui;font-variant-numeric:tabular-nums;margin:6px 0}
+.cnext{text-align:center;margin-top:12px;color:var(--mut)}
 .felicita{background:var(--grad);color:#fff;border-radius:var(--r);padding:16px;text-align:center;font-weight:800;margin-top:10px;animation:pop .5s ease}
 @keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.felicita,.chip,.bar i{animation:none;transition:none}}
@@ -191,6 +205,7 @@ button.empezar{margin-top:14px;background:var(--grad);box-shadow:0 6px 16px rgba
   <div class="tabs" id="tabs" role="tablist"><button type="button" role="tab" id="tab-ent" class="on" aria-selected="true">🏋️ Entreno</button><button type="button" role="tab" id="tab-nut" aria-selected="false" hidden>🍽️ Nutrición</button><button type="button" role="tab" id="tab-prog" aria-selected="false">📈 Progreso</button><button type="button" id="tinfo" aria-label="Ayuda: te explico esta pantalla">ⓘ</button></div>
   <div class="card" id="aviso18" hidden></div>
   <div class="card" id="pend" hidden></div>
+  <div class="card" id="ayer" hidden></div>
   <div class="card" id="sessions" hidden><h2>Sesión de hoy</h2><div id="sesbody"></div>
     <div class="rest" id="rest" hidden><span class="muted small">⏱ Descanso entre series</span><button data-s="60">1:00</button><button data-s="90">1:30</button><button data-s="120">2:00</button><button data-s="180">3:00</button><span id="restv"></span></div></div>
   <div class="card" id="restday" hidden></div>
@@ -222,6 +237,7 @@ button.empezar{margin-top:14px;background:var(--grad);box-shadow:0 6px 16px rgba
         <div><label class="lb">Desnivel acumulado (m)</label><input id="elev" type="number" inputmode="numeric" min="0" max="5000" placeholder="Opcional"></div>
         <div style="display:flex;align-items:end"><label class="lb" style="display:flex;gap:8px;align-items:center;margin:0 0 10px"><input id="stops" type="checkbox" style="width:auto"> Hice paradas</label></div>
       </div>
+      <label class="lb" style="margin-top:12px">¿Podías hablar mientras lo hacías?</label><div class="caras" id="habla" role="group"></div><div class="muted small" id="ritmomed" style="margin-top:6px"></div>
       <div id="vamrow" hidden style="margin-top:10px"><label class="lb">Test de 6 minutos: kilómetros recorridos SOLO en esos 6 min</label><input id="vamd" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej.: 1.25"></div>
       <div style="height:14px"></div>
     </div>
@@ -488,14 +504,11 @@ function showSessions() {
         + (e.lesion ? `<div class="small bad">⚠️ ${esc(e.lesion)}</div>` : "")
         + (e.nota ? `<div class="small">${esc(e.nota)}</div>` : "") + `</div></div>`; }).join("");
     } else if ((b.bloques || []).length) {
-      cuerpo = b.bloques.map(x => { const src = x.gif && b.gifbase ? b.gifbase + x.gif + ".gif" : ""; return `<div class="ex${src ? "" : " nothumb"}">`
-        + (src ? `<button type="button" class="thb" data-si="${si}" data-bi="${b.bloques.indexOf(x)}" aria-label="Ver cómo se hace ${esc(x.nombre)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt=""><span class="play">▶</span></button>` : "") + `<div class="exb"><div class="t">${esc(x.nombre)} · ${x.minutos} min</div>`
-        + `<div class="small">${[x.esfuerzo ? "esfuerzo " + esc(x.esfuerzo) + "/10" : "", x.pulso ? esc(x.pulso) : "", x.ritmo ? esc(x.ritmo) : "", x.test_habla ? esc(x.test_habla) : "", x.recuperacion ? esc(x.recuperacion) : ""].filter(Boolean).join(" · ")}</div>`
-        + (x.como ? `<div class="small muted">${esc(x.como)}</div>` : "") + `</div></div>`; }).join("");
+      cuerpo = cardioHtml(b, si);
     } else {
       cuerpo = `<ul>${(b.items || []).map(i => `<li>${esc(i)}</li>`).join("")}</ul>`;
     }
-    return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}${(b.ex || []).length ? `<button type="button" class="empezar" data-empezar="${si}">▶ Empezar sesión</button>` : ""}${cal}${cuerpo}`
+    return `<div class="ses"><h3>${esc(s.title)}</h3>${b.resumen ? `<div class="muted">${esc(b.resumen)}</div>` : ""}${(b.ex || []).length ? `<button type="button" class="empezar" data-empezar="${si}">▶ Empezar sesión</button>` : ((b.bloques || []).some(x => (x.steps || []).length) ? `<button type="button" class="empezar" data-cardio="${si}">▶ Empezar cardio</button>` : "")}${cal}${cuerpo}`
       + (b.nota_entrenador ? `<div class="callout">${esc(b.nota_entrenador)}</div>` : "")
       + ((b.ex || []).length ? `<button type="button" class="anota" data-anota="${si}" style="background:transparent;color:var(--ac);border:2px solid var(--ac);box-shadow:none">✍️ Anotar al terminar</button>` : "")
       + `<button class="pdf" data-i="${si}">📄 Descargar el PDF de esta sesión</button><div class="msg"></div></div>`;
@@ -664,6 +677,7 @@ function buildClosingForm() {
   $("vamrow").hidden = !b.vam_test;
   $("dur").value = prev.duration_min ?? ""; $("rpe").value = prev.rpe ?? ""; $("cnote").value = prev.note ?? "";
   ANIMO = +(pd.animo || 0); pintarAnimo(); pintarSilueta();
+  HABLA = +((pd.cardio || {}).habla || 0); pintarHabla(); ritmoMedio();
   say("mc", prev.duration_min ? "Ya enviado hoy. Puedes corregirlo." : "", true);
   if (!prev.duration_min && restaurarBorrador(`c|${s ? s.title : ""}|`)) say("mc", "Recuperé lo que tenías a medias. Revísalo y envíalo.", true);
   bloquearEscrituras();
@@ -720,6 +734,8 @@ function collectData() {
     if (d > 0) c.distance_km = d; if (a >= 30) c.hr_avg = a; if (m >= 30) c.hr_max = m;
     const el = num($("elev").value), vd = num($("vamd").value);
     if (el >= 0) c.elev_gain = el; if ($("stops").checked) c.stops = true; if (b.vam_test && vd > 0) c.vam_dist_km = vd;
+    if (HABLA) c.habla = HABLA;
+    if (CR_RES && CR_RES.total) { c.bloques_hechos = CR_RES.hechos; c.bloques_total = CR_RES.total; }
     if (Object.keys(c).length) data.cardio = c;
   }
   return Object.keys(data).length ? data : null;
@@ -883,6 +899,21 @@ document.addEventListener("click", ev => {   // la ventana (dialog) esta al fina
     if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
   }
 });
+// ================= Sesiones de ayer (o antes de ayer) sin guardar: se pueden guardar con su fecha =================
+function pintarAyer() {
+  const c = $("ayer"); if (!c) return;
+  c.hidden = !PENDING.length || VER;
+  if (c.hidden) return;
+  c.innerHTML = `<h2>📝 ¿Hiciste alguna de estas?</h2><div class="muted small">Guárdala con su fecha (hasta 2 días después).</div>` + PENDING.map((p, i) => `<div class="wk"><div class="t">${esc(p.title)}</div><div class="d">${p.day === addDays(DAY, -1) ? "ayer" : fmtDay(p.day)}</div><button type="button" class="chg" data-cierra="${i}">Guardar</button></div>`).join("");
+}
+document.addEventListener("click", ev => {
+  const b = ev.target.closest ? ev.target.closest("[data-cierra]") : null; if (!b) return;
+  const p = PENDING[+b.dataset.cierra]; if (!p) return;
+  const k = closables().findIndex(x => x === p);
+  if (k >= 0 && $("selses")) { $("selses").value = String(k); if ($("selses").onchange) $("selses").onchange(); }
+  $("ccard").open = true; verPestana("ent"); $("ccard").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 // ================= Modo «entrenando ahora»: un ejercicio por pantalla, series grandes y descanso automatico =================
 let TR = null;
 const segDescanso = t => { const m = /(\d+)\s*(min|s)/i.exec(t || ""); return m ? (/min/i.test(m[2]) ? +m[1] * 60 : +m[1]) : 90; };
@@ -996,6 +1027,16 @@ async function cargarProgreso() {
     (r.sets || []).forEach(c => (c.sets || []).forEach(s => { const kg = s.kg || 0; if (!(kg > 0)) return; const o = best[s.ex]; if (!o || kg > o.kg) best[s.ex] = { kg, day: c.day }; }));
     const lista = Object.entries(best).sort((a, b) => b[1].day.localeCompare(a[1].day)).slice(0, 5);
     if (lista.length) h += `<div class="card" id="pg-marcas"><h2>🏆 Mejores marcas</h2>${lista.map(([n, o]) => `<div class="mk"><span>${esc(n)}</span><b>${fmt1(o.kg)} kg${o.day >= addDays(DAY, -7) ? " 🆕" : ""}</b></div>`).join("")}</div>`;
+    const car = (r.cardio || []).filter(x => x.c && x.c.distance_km > 0 && x.min > 0).slice(-6);
+    if (car.length) {
+      const ritmo = x => x.min / x.c.distance_km, ult = car[car.length - 1], ant = car.slice(0, -1).reverse().find(x => x.label === ult.label);
+      const d = ant ? [ult.c.distance_km - ant.c.distance_km, ritmo(ult) - ritmo(ant), (ult.c.hr_avg || 0) && (ant.c.hr_avg || 0) ? ult.c.hr_avg - ant.c.hr_avg : null] : null;
+      h += `<div class="card" id="pg-cardio"><h2>🏃 Cardio</h2><div class="big">${fmt1(ult.c.distance_km)} <small>km</small><span class="delta">${mmss(Math.round(ritmo(ult) * 60))} /km</span></div>${linea(car.map(ritmo).map(v => -v))}`
+        + (d ? `<div class="muted small">Respecto a la anterior «${esc(ult.label)}»: ${d[0] >= 0 ? "+" : ""}${fmt1(d[0])} km · ritmo ${d[1] <= 0 ? "▼ más rápido" : "▲ más lento"} ${mmss(Math.round(Math.abs(d[1]) * 60))}${d[2] != null ? " · " + (d[2] <= 0 ? "" : "+") + d[2] + " lpm" : ""}</div>` : "")
+        + car.slice().reverse().map(x => `<div class="mk"><span>${fmtDay(x.day)} · ${esc(x.label)}</span><b>${fmt1(x.c.distance_km)} km${x.c.hr_avg ? " · ❤️ " + x.c.hr_avg : ""}</b></div>`).join("") + `</div>`;
+    }
+    const vams = (r.cardio || []).filter(x => x.c && x.c.vam_dist_km > 0).map(x => x.c.vam_dist_km * 10).slice(-6);
+    if (vams.length) h += `<div class="card" id="pg-vam"><h2>⚡ Mi VAM</h2><div class="big">${fmt1(vams[vams.length - 1])} <small>km/h</small></div>${linea(vams)}<div class="muted small">De aquí salen tus ritmos por zona.</div></div>`;
     $("pgdatos").innerHTML = h || `<div class="card muted">Aquí verás tu peso y tus mejores marcas cuando vayas cerrando sesiones.</div>`;
   } catch (e) { $("pgdatos").innerHTML = ""; }
 }
@@ -1082,7 +1123,7 @@ function verPestana(n) {
 }
 PESTANAS.forEach(k => { $("tab-" + k).onclick = () => verPestana(k); });
 const TOURS = {
-  ent: [["#ring", "Tu semana: las sesiones que llevas cerradas."], ["#sessions .ses", "Tu sesión de hoy. Toca un GIF para ver cómo se hace."], ["[data-empezar]", "Pulsa aquí para entrenar paso a paso."], ["#wcard", "Cuéntanos cómo estás en 30 segundos."], ["#ccard", "Al acabar, cierra la sesión: kilos, repeticiones y cómo te fue."]],
+  ent: [["#ring", "Tu semana: las sesiones que llevas cerradas."], ["#sessions .ses", "Tu sesión de hoy. Toca un GIF para ver cómo se hace."], ["[data-empezar],[data-cardio]", "Pulsa aquí para entrenar paso a paso, con cuenta atrás en el cardio."], ["#wcard", "Cuéntanos cómo estás en 30 segundos."], ["#ccard", "Al acabar, cierra la sesión: kilos, repeticiones y cómo te fue."]],
   nut: [[".nchips", "Elige el día y la toma."], [".oc", "Toca para ver la receta. El ✓ es «esta la tomo»."], [".nfil", "Filtra por rápidas o para llevar."], [".wid", "Agua y cómo vas hoy."], [".nbar", "Compra, menú de la semana, comer fuera y tu resumen."]],
   prog: [["#pgdatos", "Tu peso y tus mejores marcas."], ["#pginsig", "Tu racha y tus insignias."], ["#pgfotos", "Fotos y medidas: solo en tu móvil."]],
 };
@@ -1104,6 +1145,115 @@ document.addEventListener("click", ev => {
   if (t.dataset.tour === "fin") return tourFin(); TOUR.i++; tourPaso();
 });
 $("tinfo").onclick = () => lanzarTour(PESTANAS.find(k => !$("pane-" + k).hidden) || "ent");
+// ================= CARDIO con el mismo detalle que la fuerza: bloques con GIF, zonas, ritmos, consejos, cronometro guiado y registro =================
+const ZCOL = { 1: "#38bdf8", 2: "#4ade80", 3: "#facc15", 4: "#fb923c", 5: "#f87171" };
+let MOD = {};          // modalidad elegida por sesion: indice en cardio_meta.alt (o ausente = como esta pautada)
+let HABLA = 0, CR = null, CR_RES = null;
+const mmss = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+const esPrincipal = (x, i, L) => { const n = String(x.nombre).toLowerCase(); return !n.startsWith("calent") && !n.startsWith("vuelta") && !n.startsWith("core") && i === L.findIndex(y => { const m = String(y.nombre).toLowerCase(); return !m.startsWith("calent") && !m.startsWith("vuelta") && !m.startsWith("core"); }); };
+function factorMod(si, b) { const a = ((b.cardio_meta || {}).alt || [])[MOD[si]]; return a ? a.f : 1; }
+function pasosDe(x, f, principal) { return (x.steps || []).map(([s, fase]) => [principal && f !== 1 ? Math.round(s * f) : s, fase]); }
+function lineaTiempo(pasos) {
+  const tot = pasos.reduce((a, p) => a + p[0], 0); if (pasos.length < 2 || !tot) return "";
+  return `<div class="tl" aria-hidden="true">${pasos.map(([s, f]) => `<i class="${f}" style="flex:${s}"></i>`).join("")}</div>`;
+}
+function bloqueHtml(x, i, si, b) {
+  const L = b.bloques, f = factorMod(si, b), prin = esPrincipal(x, i, L), pasos = pasosDe(x, f, prin);
+  const min = prin && f !== 1 ? Math.round(x.minutos * f) : x.minutos;
+  const src = x.gif && b.gifbase ? b.gifbase + x.gif + ".gif" : "";
+  const z = ZCOL[x.nivel] || "var(--ac)";
+  const chips = [`⏱ ${min} min`, x.esfuerzo ? `RPE ${esc(x.esfuerzo)}` : "", x.hr_lo ? `❤️ ${x.hr_lo}–${x.hr_hi}` : (x.pulso ? "❤️ " + esc(x.pulso) : ""), x.ritmo && MOD[si] == null ? `🏃 ${esc(x.ritmo)}` : "", x.test_habla ? `😮 ${esc(x.test_habla)}` : ""].filter(Boolean);
+  return `<div class="cb" style="--z:${z}"><div class="cbh">` + (src ? `<button type="button" class="thb" data-si="${si}" data-bi="${i}" aria-label="Ver cómo se hace ${esc(x.nombre)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt=""><span class="play">▶</span></button>` : "")
+    + `<div class="cbt"><div class="t">${esc(x.nombre)}</div><div class="cch">${chips.map(c => `<span>${c}</span>`).join("")}</div></div></div>`
+    + lineaTiempo(pasos)
+    + ((x.cues || []).length ? `<ul class="cues">${x.cues.map(c => `<li>${esc(c)}</li>`).join("")}</ul>` : "")
+    + ((x.drills || []).length ? `<button type="button" class="vbtn2" data-dr="${si}|${i}">▶ Ver ejercicios (${x.drills.length})</button>` : "")
+    + (x.recuperacion ? `<div class="small muted">Recuperación: ${esc(x.recuperacion)}</div>` : "")
+    + (x.como ? `<details class="det"><summary>Cómo hacerlo</summary><div class="small">${esc(x.como)}</div></details>` : "") + `</div>`;
+}
+function cardioHtml(b, si) {
+  const m = b.cardio_meta || {}, alt = m.alt || [];
+  const cab = `<div class="cbar">` + ((m.zonas || []).length ? `<button type="button" class="vbtn2" data-zonas="${si}">❤️ Mis zonas</button>` : "") + `</div>`
+    + (alt.length ? `<div class="alt" role="group" aria-label="¿Dónde lo haces?"><button type="button" data-alt="${si}|" class="${MOD[si] == null ? "on" : ""}">🏃 Como está</button>${alt.map((a, k) => `<button type="button" data-alt="${si}|${k}" class="${MOD[si] === k ? "on" : ""}">${a.e} ${esc(a.n)}</button>`).join("")}</div>` : "");
+  return cab + b.bloques.map((x, i) => bloqueHtml(x, i, si, b)).join("");
+}
+document.addEventListener("click", ev => {
+  const t = ev.target.closest ? ev.target : null; if (!t) return;
+  let b;
+  if ((b = t.closest("[data-alt]"))) { const [si, k] = b.dataset.alt.split("|"); if (k === "") delete MOD[+si]; else MOD[+si] = +k; return showSessions(); }
+  if ((b = t.closest("[data-dr]"))) { const [si, i] = b.dataset.dr.split("|").map(Number), s = SESSIONS[si].body, x = s.bloques[i]; return verGif(x.nombre, x.drills.map(([g, n, d]) => [g, `${n} · ${d}`]), s.gifbase); }
+  if ((b = t.closest("[data-zonas]"))) return abrirZonas(+b.dataset.zonas);
+  if ((b = t.closest("[data-cardio]"))) return abrirCardio(+b.dataset.cardio);
+});
+function abrirZonas(si) {
+  const s = SESSIONS[si].body, Z = (s.cardio_meta || {}).zonas || [], usadas = new Set((s.bloques || []).map(x => x.nivel).filter(Boolean));
+  $("sheetbody").innerHTML = `<h3>❤️ Mis zonas</h3><div class="zonas">${Z.map(z => `<div class="zn2${usadas.has(z.n) ? " use" : ""}" style="--z:${ZCOL[z.n]}"><b>Z${z.n}</b><div><div class="zt">${esc(z.nombre)}${usadas.has(z.n) ? " · hoy" : ""}</div><div class="zs">${[z.hr ? "❤️ " + esc(z.hr) : "", z.pace ? "🏃 " + esc(z.pace) : (z.kmh ? esc(z.kmh) : ""), "RPE " + esc(z.rpe)].filter(Boolean).join(" · ")}</div><div class="zs">😮 ${esc(z.habla)}</div></div></div>`).join("")}</div>`;
+  $("sheet").showModal();
+}
+// ---- cronometro guiado: todos los pasos de la sesion (calentamiento, tramos, recuperaciones, vuelta a la calma) con cuenta atras y avisos
+function pasosCardio(si) {
+  const b = SESSIONS[si].body, f = factorMod(si, b), out = [];
+  b.bloques.forEach((x, i) => { const prin = esPrincipal(x, i, b.bloques); pasosDe(x, f, prin).forEach(([seg, fase]) => out.push({ seg, fase, bi: i, x })); });
+  return out;
+}
+function abrirCardio(si) {
+  const P = pasosCardio(si); if (!P.length) return;
+  CR = { si, P, k: 0, t: null, pausa: false, resta: P[0].seg, fin: 0, ini: Date.now(), hechos: new Set() };
+  $("tren").hidden = false; document.body.style.overflow = "hidden"; try { navigator.wakeLock && navigator.wakeLock.request("screen").catch(() => {}); } catch (e) { /* sin wake lock */ }
+  const k = closables().findIndex(x => x.title === SESSIONS[si].title); if (k >= 0 && $("selses")) { $("selses").value = String(k); if ($("selses").onchange) $("selses").onchange(); }
+  CR.fin = Date.now() + CR.resta * 1000; CR.t = setInterval(tickCardio, 250); pintarCardio();
+}
+function aviso() { try { navigator.vibrate && navigator.vibrate([300, 120, 300]); } catch (e) { /* sin vibracion */ } try { const A = window.AudioContext || window.webkitAudioContext; if (A) { const c = new A(), o = c.createOscillator(); o.frequency.value = 880; o.connect(c.destination); o.start(); setTimeout(() => { o.stop(); c.close(); }, 250); } } catch (e) { /* sin audio */ } }
+function irPaso(k) {
+  const p = CR.P[CR.k]; if (p) CR.hechos.add(CR.k);
+  if (k >= CR.P.length) return cerrarCardio(true);
+  CR.k = Math.max(0, k); CR.resta = CR.P[CR.k].seg; CR.fin = Date.now() + CR.resta * 1000; aviso(); pintarCardio();
+}
+function tickCardio() {
+  if (!CR || CR.pausa) return;
+  const r = Math.max(0, Math.ceil((CR.fin - Date.now()) / 1000)); CR.resta = r;
+  const e = $("ccount"); if (e) e.textContent = mmss(r);
+  const tot = CR.P.reduce((a, p) => a + p.seg, 0), hecho = CR.P.slice(0, CR.k).reduce((a, p) => a + p.seg, 0) + (CR.P[CR.k].seg - r), bar = document.querySelector("#tren .sprog i");
+  if (bar) bar.style.width = Math.round(100 * hecho / Math.max(1, tot)) + "%";
+  if (r <= 0) irPaso(CR.k + 1);
+}
+function cerrarCardio(aCierre) {
+  if (!CR) return;
+  clearInterval(CR.t);
+  const total = CR.P.length, hechos = CR.hechos.size, bloques = new Set(CR.P.map(p => p.bi)), hechosB = new Set([...CR.hechos].map(k => CR.P[k].bi));
+  const min = Math.max(1, Math.round(CR.P.slice(0, CR.k).reduce((a, p) => a + p.seg, 0) / 60 + (CR.P[Math.min(CR.k, total - 1)].seg - CR.resta) / 60));
+  if (aCierre && hechos) { setIn("#dur", min); CR_RES = { total: bloques.size, hechos: [...bloques].filter(b => { const idx = CR.P.map((p, k) => [p, k]).filter(([p]) => p.bi === b).map(([, k]) => k); return idx.every(k => CR.hechos.has(k)); }).length }; }
+  CR = null; $("tren").hidden = true; document.body.style.overflow = "";
+  if (aCierre) { $("ccard").open = true; verPestana("ent"); $("ccard").scrollIntoView({ behavior: "smooth", block: "start" }); }
+}
+function pintarCardio() {
+  const p = CR.P[CR.k], x = p.x, sig = CR.P[CR.k + 1], z = ZCOL[x.nivel] || "var(--ac)";
+  const faseT = p.fase === "r" ? "RECUPERA" : p.fase === "c" ? String(x.nombre).toUpperCase() : (x.nivel >= 4 ? "FUERTE" : "ACTIVO");
+  const tot = CR.P.reduce((a, q) => a + q.seg, 0), hecho = CR.P.slice(0, CR.k).reduce((a, q) => a + q.seg, 0);
+  const chips = [x.esfuerzo ? `RPE ${esc(x.esfuerzo)}` : "", x.hr_lo ? `❤️ ${x.hr_lo}–${x.hr_hi}` : "", x.ritmo ? `🏃 ${esc(x.ritmo)}` : "", x.test_habla ? `😮 ${esc(x.test_habla)}` : ""].filter(Boolean);
+  $("tren").innerHTML = `<div class="th2"><button type="button" data-cx="1" class="tx" aria-label="Salir">✕</button><div class="muted small">Paso ${CR.k + 1} de ${CR.P.length}</div><div class="sprog"><i style="width:${Math.round(100 * hecho / Math.max(1, tot))}%"></i></div></div>`
+    + `<div class="cfase" style="--z:${z}">${esc(faseT)}</div><div class="cnom">${esc(x.nombre)}</div><div class="ccount" id="ccount">${mmss(CR.resta)}</div>`
+    + `<div class="cch" style="justify-content:center">${chips.map(c => `<span>${c}</span>`).join("")}</div>`
+    + ((x.cues || []).length && p.fase !== "r" ? `<ul class="cues" style="margin-top:12px">${x.cues.map(c => `<li>${esc(c)}</li>`).join("")}</ul>` : "")
+    + (sig ? `<div class="cnext">Después: <b>${sig.fase === "r" ? "Recupera" : sig.fase === "c" ? esc(sig.x.nombre) : "Activo"}</b> · ${mmss(sig.seg)}</div>` : `<div class="cnext">Es el último paso 🏁</div>`)
+    + `<div class="tnav"><button type="button" data-cp="-1"${CR.k ? "" : " disabled"}>◀</button><button type="button" data-cpausa="1">${CR.pausa ? "▶ Seguir" : "⏸ Pausa"}</button><button type="button" data-cp="1">${CR.k < CR.P.length - 1 ? "Saltar ▶" : "Terminar 🏁"}</button></div>`;
+}
+document.addEventListener("click", ev => {
+  const t = ev.target.closest && ev.target.closest("#tren") ? ev.target : null; if (!t || !CR) return;
+  let b;
+  if (t.closest("[data-cx]")) return cerrarCardio(false);
+  if ((b = t.closest("[data-cp]"))) return irPaso(CR.k + +b.dataset.cp);
+  if (t.closest("[data-cpausa]")) { if (CR.pausa) { CR.fin = Date.now() + CR.resta * 1000; CR.pausa = false; } else CR.pausa = true; pintarCardio(); }
+});
+// ---- cierre de cardio: test del habla y ritmo medio
+const HABLAS = [[1, "😀 Sí"], [2, "😐 Con pausas"], [3, "😮‍💨 No"]];
+function pintarHabla() { const c = $("habla"); if (c) c.innerHTML = HABLAS.map(([v, t]) => `<button type="button" data-hb="${v}" class="${HABLA === v ? "on" : ""}">${t}</button>`).join(""); }
+document.addEventListener("click", ev => { const b = ev.target.closest ? ev.target.closest("[data-hb]") : null; if (!b) return; const v = +b.dataset.hb; HABLA = HABLA === v ? 0 : v; pintarHabla(); });
+function ritmoMedio() {
+  const d = num(($("dist") || {}).value), m = num(($("dur") || {}).value), e = $("ritmomed"); if (!e) return;
+  e.textContent = d > 0 && m > 0 ? `Ritmo medio ≈ ${mmss(Math.round(m * 60 / d))} min/km · ${fmt1(d / (m / 60))} km/h` : "";
+}
+document.addEventListener("input", ev => { if (ev.target && (ev.target.id === "dist" || ev.target.id === "dur")) ritmoMedio(); });
 async function load() {
   $("day").textContent = new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
   if (!TOKEN) { $("err").hidden = false; return; }
@@ -1122,7 +1272,7 @@ async function load() {
     } else if (restaurarBorrador("w|")) say("mw", "Recuperé lo que tenías a medias. Revísalo y guárdalo.", true);
     showWeek();
     showSessions();
-    cargarNutricion(); cargarProgreso(); pintarFotos(); pintarInstalar(); insignias();
+    pintarAyer(); cargarNutricion(); cargarProgreso(); pintarFotos(); pintarInstalar(); insignias();
     showPend(s);
     recordatorio(s);
     if (closables().length > 1) {
